@@ -1,16 +1,12 @@
 <template>
-  <el-card>
-    <h2>信息中心页</h2>
-    <p>页面占位布局区域</p>
-  </el-card>
+  <main class="page">
+    <h1>消息页面</h1>
+    <p>展示私信、系统通知、互动消息</p>
+  </main>
 </template>
-
-<script setup lang="ts">
-// 暂无需业务代码
-</script>
-
+<script setup lang="ts"></script>
 <style scoped>
-.el-card {
-  margin: 20px;
+.page {
+  padding: 24px;
 }
 </style>

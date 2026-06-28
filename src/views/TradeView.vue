@@ -1,7 +1,7 @@
 <template>
   <main class="page">
-    <h1>发布页面</h1>
-    <p>用于发布商品、失物、拼单或跑腿信息</p>
+    <h1>二手交易页</h1>
+    <p>展示二手商品列表</p>
   </main>
 </template>
 <script setup lang="ts"></script>
