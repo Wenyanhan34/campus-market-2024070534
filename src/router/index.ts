@@ -16,7 +16,7 @@ const routes: RouteRecordRaw[] = [
   },
   // 2.信息详情页
   {
-    path: '/detail',
+    path: '/detail/:id',// 动态路由：携带商品id
     name: 'detail',
     component: () => import('@/views/DetailView.vue')
   },
