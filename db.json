@@ -1,0 +1,235 @@
+{
+    "trades": [
+        {
+            "id": 1,
+            "title": "高等数学上册教材",
+            "price": 22,
+            "category": "教材教辅",
+            "condition": "九成新，无涂鸦",
+            "publisher": "student01",
+            "publishingTime": "2026-06-20",
+            "location": "一食堂楼下自提",
+            "image": "",
+            "status": "open"
+        },
+        {
+            "id": 2,
+            "title": "青轴机械游戏键盘",
+            "price": 75,
+            "category": "数码电子产品",
+            "condition": "几乎全新，无磕碰",
+            "publisher": "student02",
+            "publishingTime": "2026-06-22",
+            "location": "3栋男生宿舍楼下",
+            "image": "",
+            "status": "open"
+        },
+        {
+            "id": 3,
+            "title": "宿舍可折叠书桌",
+            "price": 35,
+            "category": "生活用品",
+            "condition": "八成新",
+            "publisher": "student01",
+            "publishingTime": "2026-06-23",
+            "location": "5栋宿舍",
+            "image": "",
+            "status": "closed"
+        },
+        {
+            "id": 4,
+            "title": "四六级全套真题试卷",
+            "price": 15,
+            "category": "教材教辅",
+            "condition": "空白无笔记",
+            "publisher": "student03",
+            "publishingTime": "2026-06-25",
+            "location": "图书馆门口",
+            "image": "",
+            "status": "open"
+        },
+        {
+            "id": 5,
+            "title": "静音宿舍小风扇",
+            "price": 20,
+            "category": "生活用品",
+            "condition": "全新未拆封",
+            "publisher": "student02",
+            "publishingTime": "2026-06-26",
+            "location": "二食堂门口",
+            "image": "",
+            "status": "open"
+        }
+    ],
+    "lostFounds": [
+        {
+            "id": 1,
+            "title": "黑色有线耳机丢失寻物",
+            "type": "lost",
+            "goodsName": "入耳式有线耳机",
+            "location": "图书馆三楼自习室",
+            "time": "2026-06-20 15:00",
+            "contact": "微信：student01",
+            "desc": "耳机侧面印有白色logo",
+            "status": "open"
+        },
+        {
+            "id": 2,
+            "title": "捡到蓝色校园一卡通",
+            "type": "found",
+            "goodsName": "校园学生卡",
+            "location": "一食堂一楼窗口",
+            "time": "2026-06-21 12:10",
+            "contact": "3栋302宿舍",
+            "desc": "卡面贴动漫贴纸",
+            "status": "open"
+        },
+        {
+            "id": 3,
+            "title": "丢失黑色折叠雨伞",
+            "type": "lost",
+            "goodsName": "黑胶折叠伞",
+            "location": "2号教学楼楼梯口",
+            "time": "2026-06-22 18:30",
+            "contact": "student02",
+            "desc": "伞柄有明显磨损痕迹",
+            "status": "done"
+        },
+        {
+            "id": 4,
+            "title": "捡到白色350ml保温杯",
+            "type": "found",
+            "goodsName": "保温杯",
+            "location": "操场北侧看台",
+            "time": "2026-06-24 17:00",
+            "contact": "4栋201宿舍",
+            "desc": "杯身印有本校校徽",
+            "status": "open"
+        },
+        {
+            "id": 5,
+            "title": "丢失2万毫安充电宝",
+            "type": "lost",
+            "goodsName": "大容量充电宝",
+            "location": "校园快递驿站",
+            "time": "2026-06-25 10:20",
+            "contact": "student03",
+            "desc": "外壳粉色，带数据线",
+            "status": "open"
+        }
+    ],
+    "groupBuys": [
+        {
+            "id": 1,
+            "title": "奶茶拼单满50减20",
+            "type": "饮品拼单",
+            "targetNum": 5,
+            "currentNum": 2,
+            "deadline": "2026-06-30 20:00",
+            "location": "校门口奶茶店",
+            "publisher": "student01",
+            "status": "open"
+        },
+        {
+            "id": 2,
+            "title": "夏季西瓜团购",
+            "type": "水果拼单",
+            "targetNum": 8,
+            "currentNum": 4,
+            "deadline": "2026-06-29 18:00",
+            "location": "校门口水果店",
+            "publisher": "student02",
+            "status": "open"
+        },
+        {
+            "id": 3,
+            "title": "羽毛球运动搭子组队",
+            "type": "运动搭子",
+            "targetNum": 4,
+            "currentNum": 3,
+            "deadline": "2026-06-28 21:00",
+            "location": "校内体育馆羽毛球场",
+            "publisher": "student03",
+            "status": "closed"
+        },
+        {
+            "id": 4,
+            "title": "外卖满减拼单",
+            "type": "餐饮拼单",
+            "targetNum": 6,
+            "currentNum": 3,
+            "deadline": "2026-06-28 12:00",
+            "location": "3栋宿舍楼下集合",
+            "publisher": "student01",
+            "status": "open"
+        },
+        {
+            "id": 5,
+            "title": "图书馆自习搭子",
+            "type": "学习搭子",
+            "targetNum": 2,
+            "currentNum": 1,
+            "deadline": "2026-07-01 08:00",
+            "location": "图书馆一楼自习区",
+            "publisher": "student02",
+            "status": "open"
+        }
+    ],
+    "errands": [
+        {
+            "id": 1,
+            "title": "食堂早餐代取送到3栋",
+            "type": "代取餐",
+            "reward": 5,
+            "pickAddr": "第一食堂",
+            "sendAddr": "3栋宿舍楼下",
+            "deadline": "2026-06-29 07:20",
+            "publisher": "student01",
+            "status": "open"
+        },
+        {
+            "id": 2,
+            "title": "快递驿站取件送到5栋",
+            "type": "代取快递",
+            "reward": 4,
+            "pickAddr": "校园快递驿站",
+            "sendAddr": "5栋宿舍",
+            "deadline": "2026-06-28 19:00",
+            "publisher": "student02",
+            "status": "open"
+        },
+        {
+            "id": 3,
+            "title": "文件送至行政楼办公室",
+            "type": "文件跑腿",
+            "reward": 8,
+            "pickAddr": "2栋宿舍",
+            "sendAddr": "行政楼203办公室",
+            "deadline": "2026-06-28 14:00",
+            "publisher": "student03",
+            "status": "done"
+        },
+        {
+            "id": 4,
+            "title": "超市零食代购送到4栋",
+            "type": "代购跑腿",
+            "reward": 6,
+            "pickAddr": "校园超市",
+            "sendAddr": "4栋宿舍",
+            "deadline": "2026-06-29 11:30",
+            "publisher": "student01",
+            "status": "open"
+        },
+        {
+            "id": 5,
+            "title": "书本送至图书馆自习座位",
+            "type": "物品代送",
+            "reward": 3,
+            "pickAddr": "1栋宿舍",
+            "sendAddr": "图书馆三楼",
+            "deadline": "2026-06-28 16:00",
+            "publisher": "student02",
+            "status": "open"
+        }
+    ]
+}
