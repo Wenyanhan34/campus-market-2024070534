@@ -2,33 +2,38 @@
 
 ## 1. 今日完成内容
 
-今日主要完成了基于JSON Server的Mock数据搭建、项目接口统一封装、业务页面数据请求与列表渲染全套流程。首先完成JSON Server版本降级，将新版测试版更换为稳定的0.17.4版本，解决新版兼容问题。其次配置项目Mock启动脚本，实现本地3002端口模拟后端接口服务。同时封装项目通用HTTP请求模块，统一管理Axios请求地址与超时规则，并编写四类业务接口请求文件，分别对应二手交易、失物招领、拼单搭子、跑腿委托模块。最后完成四个核心页面的开发，通过页面挂载生命周期请求Mock数据，结合TS接口类型约束完成规范的列表渲染，同时封装空状态组件优化无数据展示场景，彻底解决项目中的TS类型报错与页面渲染异常问题。
+今日完成了数据模型与接口层的统一对齐工作。根据 Day3 规范要求，对 `db.json` 中四类业务数据的字段命名进行了标准化调整，统一使用 `publishTime`、`itemName`、`eventTime`、`targetCount`、`currentCount`、`taskType`、`from`、`to` 等规范字段名，并对每条数据补充了 `description` 描述字段。同时在 `src/api/` 各模块中新增导出的 TypeScript 接口定义，各页面视图改为引用 API 层类型，消除了本地重复类型定义。最终通过 `vue-tsc` 类型检查和生产构建验证。
 
 ## 2. Mock 数据结构说明
 
-| 数据集合   | 对应业务 | 主要字段                                           | 页面用途           |
-| ---------- | -------- | -------------------------------------------------- | ------------------ |
-| trades     | 二手交易 | title、price、category、location、status           | 展示二手商品列表   |
-| lostFounds | 失物招领 | title、type、itemName、location、eventTime、status | 展示失物和招领信息 |
-| groupBuys  | 拼单搭子 | title、type、targetCount、currentCount、deadline   | 展示拼单和搭子信息 |
-| errands    | 跑腿委托 | title、taskType、reward、from、to、deadline        | 展示跑腿任务列表   |
+| 数据集合   | 对应业务 | 主要字段                                                                                        | 页面用途           |
+| ---------- | -------- | ----------------------------------------------------------------------------------------------- | ------------------ |
+| trades     | 二手交易 | title、price、category、condition、publisher、publishTime、location、image、status、description | 展示二手商品列表   |
+| lostFounds | 失物招领 | title、type、itemName、location、eventTime、contact、status、description                        | 展示失物和招领信息 |
+| groupBuys  | 拼单搭子 | title、type、targetCount、currentCount、deadline、location、publisher、status、description      | 展示拼单和搭子信息 |
+| errands    | 跑腿委托 | title、taskType、reward、from、to、deadline、publisher、status、description                     | 展示跑腿任务列表   |
 
 ## 3. 我的设计
 
-本次Mock数据字段设计完全贴合校园市集真实使用场景，兼顾实用性与页面展示需求。二手交易模块设计price价格字段和condition成色字段，是校园二手交易的核心参考信息，方便学生快速判断商品价值；失物招领模块设置type类型字段，可精准区分遗失、招领两类信息，便于用户筛选查询。拼单搭子模块设计targetCount目标人数和currentCount当前人数字段，能够直观展示拼单进度，让学生判断是否加入拼单。跑腿委托模块设计from取件地址、to送达地址和reward酬劳字段，完整覆盖校园跑腿的核心要素，满足学生发布、接单的基本需求，贴合校园日常使用场景。
+数据字段设计完全贴合校园市集的真实使用场景。
+
+- **二手交易设 price 和 condition**：价格和成色是校园二手交易的核心决策信息，学生浏览商品时最先关注的就是价格是否合理、物品成色如何，这两个字段直接决定了交易能否达成。
+- **失物招领设 type 字段**：用于区分"遗失"和"拾到"两类信息，便于用户按类型筛选，快速找到自己需要的寻物启事或拾物登记。
+- **拼单搭子设 targetCount 和 currentCount**：目标人数和当前人数能直观展示拼单进度，学生可以判断是否需要加入、距离成团还差多少人，提升拼单成功率。
+- **跑腿委托设 from、to 和 reward**：取件地址和送达地址完整覆盖跑腿路线，酬劳字段是接单者最关心的信息，这三个字段构成了跑腿任务的核心要素。
 
 ## 4. AI 设计
 
-本次开发中，AI辅助完成了多项基础代码生成工作，包括规范化的页面结构代码、TS数据接口定义、通用组件模板以及四类业务页面的列表渲染逻辑。同时AI协助生成了基础的API请求函数、空状态组件样式和页面布局代码，大幅提升开发效率。但AI生成内容存在不合理之处：初始生成的代码使用了模糊类型Record<string, unknown>，导致TS出现大量类型报错；同时生成的v-for循环key值存在乱码错误，无法直接使用；部分数据字段命名不贴合校园场景，存在冗余复杂字段，不符合项目规范。
+AI辅助生成了规范化的页面骨架代码、列表渲染逻辑和通用组件模板，包括ItemCard卡片组件和EmptyState空状态组件。AI也帮助生成了Axios请求实例和四个业务API模块的初始代码，以及db.json的Mock数据结构框架。但AI生成的初始代码使用了模糊类型 `Record<string, unknown>` 定义 props，导致 TypeScript 出现大量红色报错；同时部分数据字段命名不够规范（如 `pickAddr`、`sendAddr`、`goodsName`），与Day3要求的标准字段名不匹配。
 
 ## 5. 最终调整
 
-针对AI生成的不合理内容，我进行了多处人工修改与优化。首先删除了AI生成的模糊类型定义，手动为每一类业务数据编写专属TS接口，精准约束字段类型，解决所有TS类型报错。其次修正了v-for循环的key值错误，替换为规范的item.id绑定方式，符合Vue语法规范。同时删除了部分冗余、无用的复杂字段，简化Mock数据结构，适配校园简易业务场景。另外统一规范API请求代码，沿用项目原生封装的http实例，替换AI直接引入Axios的冗余写法，保证项目代码风格统一。
+针对AI生成的不合理内容进行了多项手动修正。首先在 `src/api/` 各模块中为每一类业务数据定义了专属的 `export interface` 类型接口，精准约束字段类型，页面视图改为引用 API 层类型而非本地重复定义。其次对 `db.json` 进行了字段重命名：`publishingTime` 改为 `publishTime`、`goodsName` 改为 `itemName`、`time` 改为 `eventTime`、`desc` 改为 `description`、`targetNum/currentNum` 改为 `targetCount/currentCount`、`pickAddr/sendAddr` 改为 `from/to`、`type`（跑腿）改为 `taskType`。同时为所有数据项补充了 `description` 字段，使每条数据都有完整的场景描述。
 
 ## 6. 遇到的问题与解决方法
 
-本次开发遇到的核心问题是TS数据类型报错导致列表渲染异常。在初始页面开发中，使用默认空数组定义数据，TS会默认推断为never类型，无法读取数据中的id、price等字段，同时AI生成的Record<string, unknown>模糊类型，导致key值无法识别、页面标红报错，无法正常进行列表渲染。解决方法：放弃模糊类型定义，手动为二手交易、失物招领、拼单、跑腿四类数据分别定义专属Interface接口，明确每个字段的类型，精准约束数据结构，同时修正v-for循环key的绑定错误，保存后所有红色报错消失，页面可正常读取Mock数据并完成列表渲染。
+本次遇到的主要问题是字段名不一致导致页面渲染与Mock数据脱节。之前美化的过程中使用了与Day3规范不同的字段命名（如 `goodsName`、`currentNum`、`pickAddr`），虽然页面能正常运行，但数据模型不符合项目规范要求，后续扩展和维护会变得困难。解决方法：统一将 `db.json` 中的所有字段名改为 Day3 规范标准名称，同步更新 `src/api/*.ts` 中的TypeScript接口定义，并在各页面视图中更新模板绑定的字段引用。调整后通过 `vue-tsc --build` 类型检查无错误，`vite build` 构建成功。
 
 ## 7. 今日反思
 
-本次基于Mock数据、JSON Server的接口开发与列表渲染实操，是前后端分离项目开发的基础核心流程。Mock数据可以模拟真实后端返回数据，规避后端接口未完成导致的前端开发停滞问题，让前端可以独立完成页面开发与调试。JSON Server能够快速搭建本地模拟服务，低成本实现接口调试、数据更新与热重载，极大提升开发效率。而列表渲染是前端页面数据展示的核心能力，熟练掌握数据请求、类型约束、循环渲染逻辑，能够规范代码结构、减少线上bug。本次学习让我明白规范的数据建模和严谨的TS类型定义，是保障项目稳定运行、提升代码可维护性的关键，为后续新增数据增删改查功能、项目迭代开发打下坚实基础。
+Mock数据建模是前后端分离开发的基础环节。规范的字段命名、统一的类型定义能够保证数据流在 API 层、组件层和视图层之间顺畅传递，减少因字段不一致导致的调试成本。接口请求模块按业务拆分（trade、lostFound、groupBuy、errand）使代码结构清晰、职责分明，后续新增接口只需在对应模块中扩展即可。列表渲染是前端页面最核心的数据展示能力，结合 TypeScript 类型约束可以有效避免运行时字段访问错误。本次数据建模与接口封装的规范性优化，为后续增删改查功能开发和真实后端对接打下了坚实基础。

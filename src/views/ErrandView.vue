@@ -1,32 +1,35 @@
 <template>
-  <main class="page">
-    <h1>跑腿委托</h1>
+  <div class="page">
+    <div class="page-header">
+      <h1>跑腿委托</h1>
+    </div>
+
     <EmptyState v-if="errands.length === 0" text="暂无跑腿任务" />
     <div v-else class="list-wrap">
-      <!-- 这里是正确key：shturl. -->
       <ItemCard v-for="item in errands" :key="item.id" :item="item">
-        <p>酬劳：{{ item.reward }}元 | 取件：{{ item.pickAddr }}</p>
-        <p>送达地址：{{ item.sendAddr }}</p>
+        <div class="item-tags">
+          <el-tag type="warning" size="small">{{ item.taskType }}</el-tag>
+          <el-tag :type="item.status === 'open' ? 'success' : 'info'" size="small">
+            {{ item.status === 'open' ? '进行中' : '已完成' }}
+          </el-tag>
+        </div>
+        <p>
+          <el-tag type="danger" size="small" effect="dark" class="reward-tag">
+            ￥{{ item.reward }}
+          </el-tag>
+          <el-icon><Position /></el-icon> 取件：{{ item.from }}
+        </p>
+        <p><el-icon><Location /></el-icon> 送达：{{ item.to }} | <el-icon><Clock /></el-icon> 截止：{{ item.deadline }}</p>
       </ItemCard>
     </div>
-  </main>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getErrands } from '@/api/errand'
+import { getErrands, type ErrandItem } from '@/api/errand'
 import ItemCard from '@/components/ItemCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
-
-interface ErrandItem {
-  id: number
-  type: string
-  reward: number
-  pickAddr: string
-  sendAddr: string
-  deadline: string
-  status: string
-}
 
 const errands = ref<ErrandItem[]>([])
 
@@ -37,6 +40,34 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page { padding: 24px; }
-.list-wrap { margin-top: 20px; }
+.page { padding: 0; }
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 22px;
+  color: #1f2937;
+}
+
+.item-tags {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.reward-tag {
+  margin-right: 4px;
+}
+
+:deep(p) {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 </style>

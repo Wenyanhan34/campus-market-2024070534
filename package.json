@@ -16,6 +16,7 @@
     "mock": "json-server db.json --watch --port 3002"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
     "element-plus": "^2.14.2",
     "pinia": "^3.0.4",
     "vue": "^3.5.38",

@@ -79,4 +79,9 @@ const router = createRouter({
   ],
 })
 
+router.beforeEach((to) => {
+  const title = (to.meta?.title as string) || '校园轻集市'
+  document.title = `${title} — 校园轻集市`
+})
+
 export default router
