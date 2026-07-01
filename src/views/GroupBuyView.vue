@@ -1,10 +1,21 @@
 <template>
   <div class="page">
     <div class="page-header">
-      <h1>拼单搭子</h1>
+      <div class="page-header-left">
+        <h1>拼单搭子</h1>
+        <el-tag v-if="groupBuys.length" type="info" effect="plain" round>
+          共 {{ groupBuys.length }} 条
+        </el-tag>
+      </div>
     </div>
 
-    <EmptyState v-if="groupBuys.length === 0" text="暂无拼单信息" />
+    <LoadingSkeleton v-if="loading" :count="4" />
+
+    <EmptyState v-else-if="groupBuys.length === 0" text="暂无拼单信息">
+      <template #action>
+        <el-button type="primary" size="small" @click="$router.push('/publish')">去发布</el-button>
+      </template>
+    </EmptyState>
 
     <div v-else class="list-wrap">
       <ItemCard
@@ -13,25 +24,23 @@
         :title="item.title"
         :description="item.description"
         :location="item.location"
+        category-color="groupBuy"
       >
         <template #tag>
-          <div class="item-tags">
-            <el-tag type="success" size="small">{{ item.type }}</el-tag>
-            <el-tag :type="item.status === 'open' ? 'primary' : 'info'" size="small">
-              {{ item.status === 'open' ? '招募中' : '已结束' }}
-            </el-tag>
-          </div>
+          <el-tag type="success" size="small" round>{{ item.type }}</el-tag>
+          <el-tag :type="item.status === 'open' ? 'primary' : 'info'" size="small" round>
+            {{ item.status === 'open' ? '招募中' : '已结束' }}
+          </el-tag>
         </template>
         <template #footer>
           <div class="progress-info">
             <span class="item-meta">
-              <el-icon><UserFilled /></el-icon> 进度：{{ item.currentCount }}/{{ item.targetCount }} 人
+              <el-icon><UserFilled /></el-icon> {{ item.currentCount }}/{{ item.targetCount }} 人
             </span>
             <el-progress
               :percentage="Math.round((item.currentCount / item.targetCount) * 100)"
               :stroke-width="6"
-              striped
-              striped-flow
+              :color="item.currentCount / item.targetCount >= 0.8 ? 'var(--color-success)' : 'var(--color-primary)'"
               class="progress-bar"
             />
           </div>
@@ -64,23 +73,70 @@ import { ref, onMounted } from 'vue'
 import { getGroupBuys, type GroupBuyItem } from '@/api/groupBuy'
 import ItemCard from '@/components/ItemCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import LoadingSkeleton from '@/components/LoadingSkeleton.vue'
 import { useFavoriteStore } from '@/stores/favorite'
 
 const favoriteStore = useFavoriteStore()
 const groupBuys = ref<GroupBuyItem[]>([])
+const loading = ref(true)
 
 onMounted(async () => {
-  const res = await getGroupBuys()
-  groupBuys.value = res.data
+  try {
+    const res = await getGroupBuys()
+    groupBuys.value = res.data
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 
 <style scoped>
 .page { padding: 0; }
-.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-.page-header h1 { margin: 0; font-size: 22px; color: #1f2937; }
-.item-tags { display: flex; gap: 6px; flex-shrink: 0; }
-.progress-info { display: flex; flex-direction: column; gap: 4px; width: 100%; }
-.progress-bar { max-width: 200px; }
-.item-meta { font-size: 13px; color: #6b7280; display: flex; align-items: center; gap: 4px; }
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-header-left h1 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.list-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.progress-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+}
+
+.progress-bar {
+  max-width: 200px;
+}
+
+.item-meta {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 </style>

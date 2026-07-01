@@ -1,8 +1,14 @@
 <template>
   <nav class="app-nav">
-    <RouterLink v-for="link in navLinks" :key="link.path" :to="link.path" class="nav-item">
+    <RouterLink
+      v-for="link in navLinks"
+      :key="link.path"
+      :to="link.path"
+      class="nav-item"
+    >
       <el-icon :size="18"><component :is="link.icon" /></el-icon>
       <span>{{ link.label }}</span>
+      <span v-if="link.badge" class="nav-badge">{{ link.badge }}</span>
     </RouterLink>
   </nav>
 </template>
@@ -15,7 +21,7 @@ const navLinks = [
   { path: '/group-buy', label: '拼单搭子', icon: 'UserFilled' },
   { path: '/errand', label: '跑腿委托', icon: 'Van' },
   { path: '/publish', label: '发布', icon: 'Plus' },
-  { path: '/message', label: '消息', icon: 'Message' },
+  { path: '/message', label: '消息', icon: 'Message', badge: '2' },
   { path: '/user', label: '我的', icon: 'Avatar' },
 ]
 </script>
@@ -23,43 +29,64 @@ const navLinks = [
 <style scoped>
 .app-nav {
   display: flex;
-  gap: 4px;
+  flex: 1;
+  justify-content: center;
   align-items: center;
+  gap: 10px;
+  max-width: none;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
-  color: #4b5563;
+  padding: 8px 22px;
+  color: var(--color-text-secondary);
   text-decoration: none;
   font-size: 14px;
-  border-radius: 8px;
-  transition: all 0.25s ease;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
   position: relative;
+  white-space: nowrap;
 }
 
 .nav-item:hover {
-  background: #f0f4ff;
-  color: #2563eb;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
 }
 
 .nav-item.router-link-active {
-  background: #eff6ff;
-  color: #2563eb;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
   font-weight: 600;
 }
 
 .nav-item.router-link-active::after {
   content: '';
   position: absolute;
-  bottom: 0;
+  bottom: -1px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60%;
+  width: 70%;
   height: 3px;
-  background: #2563eb;
+  background: var(--color-primary);
   border-radius: 3px 3px 0 0;
+}
+
+.nav-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+  border-radius: 8px;
 }
 </style>

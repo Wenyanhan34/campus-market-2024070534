@@ -1,24 +1,43 @@
 <template>
   <div class="page">
+    <!-- 封面 + 个人信息 -->
     <el-card shadow="never" class="profile-card">
-      <div class="profile-inner">
-        <el-avatar :size="72" class="profile-avatar">
+      <div class="profile-cover">
+        <div class="cover-gradient" />
+      </div>
+      <div class="profile-body">
+        <el-avatar :size="80" class="profile-avatar">
           {{ userStore.userInitial }}
         </el-avatar>
         <div class="profile-info">
-          <h2>{{ userStore.displayName }}</h2>
+          <div class="profile-name-row">
+            <h2>{{ userStore.displayName }}</h2>
+            <el-button type="primary" plain size="small" @click="showEditDialog = true">
+              <el-icon><Edit /></el-icon> 编辑资料
+            </el-button>
+          </div>
           <p class="profile-meta">{{ userStore.userDescription }}</p>
           <p class="profile-bio">{{ userStore.currentUser.bio }}</p>
           <div class="profile-stats">
-            <span><strong>{{ favoriteStore.favoriteCount }}</strong> 收藏</span>
-            <span><strong>{{ publishedCount }}</strong> 发布</span>
+            <div class="stat-item">
+              <strong>{{ favoriteStore.favoriteCount }}</strong>
+              <span>收藏</span>
+            </div>
+            <div class="stat-item">
+              <strong>{{ publishedCount }}</strong>
+              <span>发布</span>
+            </div>
+            <div class="stat-item">
+              <strong>12</strong>
+              <span>浏览量</span>
+            </div>
           </div>
         </div>
-        <el-button type="primary" plain @click="showEditDialog = true">编辑资料</el-button>
       </div>
     </el-card>
 
-    <el-dialog v-model="showEditDialog" title="编辑个人资料" width="480px">
+    <!-- 编辑资料弹窗 -->
+    <el-dialog v-model="showEditDialog" title="编辑个人资料" width="480px" top="8vh">
       <el-form label-width="80px">
         <el-form-item label="昵称">
           <el-input v-model="editForm.name" />
@@ -39,77 +58,83 @@
       </template>
     </el-dialog>
 
+    <!-- Tabs: 收藏 / 发布 -->
     <el-card shadow="never" class="panel">
-      <div class="panel-header">
-        <h2>我的收藏</h2>
-        <span class="panel-count">共 {{ favoriteStore.favoriteCount }} 项</span>
-      </div>
+      <el-tabs v-model="activeTab">
+        <el-tab-pane label="我的收藏" name="favorites">
+          <div class="panel-header">
+            <span class="panel-count">共 {{ favoriteStore.favoriteCount }} 项</span>
+          </div>
 
-      <EmptyState
-        v-if="favoriteStore.favorites.length === 0"
-        text="暂无收藏内容，去逛逛吧"
-      />
+          <EmptyState
+            v-if="favoriteStore.favorites.length === 0"
+            text="暂无收藏内容，去逛逛吧"
+          />
 
-      <div v-else class="favorite-list">
-        <ItemCard
-          v-for="item in favoriteStore.favorites"
-          :key="`${item.type}-${item.id}`"
-          :title="item.title"
-          :description="item.description"
-          :location="item.location"
-        >
-          <template #tag>
-            <el-tag :type="getTypeTagType(item.type)" size="small">
-              {{ getTypeLabel(item.type) }}
-            </el-tag>
-          </template>
-          <template #footer>
-            <el-button
-              type="danger"
-              size="small"
-              plain
-              round
-              @click="favoriteStore.removeFavorite(item.type, item.id)"
+          <div v-else class="item-list">
+            <ItemCard
+              v-for="item in favoriteStore.favorites"
+              :key="`${item.type}-${item.id}`"
+              :title="item.title"
+              :description="item.description"
+              :location="item.location"
             >
-              <el-icon><Delete /></el-icon> 取消收藏
-            </el-button>
-          </template>
-        </ItemCard>
-      </div>
-    </el-card>
+              <template #tag>
+                <el-tag :type="getTypeTagType(item.type)" size="small" round>
+                  {{ getTypeLabel(item.type) }}
+                </el-tag>
+              </template>
+              <template #footer>
+                <el-button
+                  type="danger"
+                  size="small"
+                  plain
+                  round
+                  @click="favoriteStore.removeFavorite(item.type, item.id)"
+                >
+                  <el-icon><Delete /></el-icon> 取消收藏
+                </el-button>
+              </template>
+            </ItemCard>
+          </div>
+        </el-tab-pane>
 
-    <el-card shadow="never" class="panel">
-      <div class="panel-header">
-        <h2>我的发布</h2>
-        <span class="panel-count">共 {{ publishedCount }} 项</span>
-      </div>
+        <el-tab-pane label="我的发布" name="published">
+          <div class="panel-header">
+            <span class="panel-count">共 {{ publishedCount }} 项</span>
+          </div>
 
-      <EmptyState
-        v-if="allPublished.length === 0"
-        text="暂无发布记录，去发布信息吧"
-      />
+          <EmptyState
+            v-if="allPublished.length === 0"
+            text="暂无发布记录，去发布信息吧"
+          />
 
-      <div v-else class="published-list">
-        <ItemCard
-          v-for="item in allPublished"
-          :key="`${item.type}-${item.id}`"
-          :title="item.title"
-          :description="item.description"
-          :location="'location' in item ? (item as any).location : undefined"
-        >
-          <template #tag>
-            <el-tag :type="getTypeTagType(item.type)" size="small">
-              {{ getTypeLabel(item.type) }}
-            </el-tag>
-          </template>
-          <template #footer>
-            <span class="publish-time">
-              <el-icon><Clock /></el-icon>
-              {{ 'publishTime' in item ? (item as any).publishTime : (('eventTime' in item) ? (item as any).eventTime : '') }}
-            </span>
-          </template>
-        </ItemCard>
-      </div>
+          <div v-else class="item-list">
+            <ItemCard
+              v-for="item in allPublished"
+              :key="`${item.type}-${item.id}`"
+              :title="item.title"
+              :description="item.description"
+              :location="'location' in item ? (item as any).location : undefined"
+            >
+              <template #tag>
+                <el-tag :type="getTypeTagType(item.type)" size="small" round>
+                  {{ getTypeLabel(item.type) }}
+                </el-tag>
+              </template>
+              <template #footer>
+                <span class="publish-time">
+                  <el-icon><Clock /></el-icon>
+                  {{ 'publishTime' in item ? (item as any).publishTime : (('eventTime' in item) ? (item as any).eventTime : '') }}
+                </span>
+                <el-tag v-if="'status' in item" :type="(item as any).status === 'open' ? 'success' : 'info'" size="small" round effect="plain">
+                  {{ (item as any).status === 'open' ? '进行中' : '已结束' }}
+                </el-tag>
+              </template>
+            </ItemCard>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
     </el-card>
   </div>
 </template>
@@ -117,6 +142,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Edit } from '@element-plus/icons-vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ItemCard from '@/components/ItemCard.vue'
 import { useFavoriteStore } from '@/stores/favorite'
@@ -129,6 +155,7 @@ import { getErrands, type ErrandItem } from '@/api/errand'
 const userStore = useUserStore()
 const favoriteStore = useFavoriteStore()
 
+const activeTab = ref('favorites')
 const showEditDialog = ref(false)
 const editForm = ref({
   name: userStore.currentUser.name,
@@ -173,7 +200,8 @@ interface PublishedItem {
   id: number
   title: string
   description: string
-  [key: string]: unknown
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any
 }
 
 const allPublished = computed<PublishedItem[]>(() => {
@@ -218,79 +246,130 @@ function saveProfile() {
 .page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-.profile-card {
-  border-radius: 14px;
-}
-.profile-inner {
-  display: flex;
-  align-items: center;
   gap: 24px;
 }
+
+/* Profile Card */
+.profile-card {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  padding: 0;
+}
+
+.profile-cover {
+  height: 120px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed, #06b6d4);
+  position: relative;
+  overflow: hidden;
+}
+
+.cover-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.15) 0%, transparent 60%);
+}
+
+.profile-body {
+  display: flex;
+  align-items: flex-end;
+  gap: 28px;
+  padding: 0 28px 28px;
+  margin-top: -40px;
+  position: relative;
+}
+
 .profile-avatar {
-  border: 3px solid #eff6ff;
-  background: #eff6ff;
-  color: #2563eb;
+  border: 4px solid var(--color-bg-white);
+  box-shadow: var(--shadow-md);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
   font-weight: 700;
-  font-size: 28px;
+  font-size: 30px;
+  flex-shrink: 0;
 }
-.profile-info h2 {
-  margin: 0 0 4px;
+
+.profile-info {
+  flex: 1;
+  padding-top: 44px;
+}
+
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.profile-name-row h2 {
+  margin: 0;
   font-size: 22px;
-  color: #1f2937;
+  color: var(--color-text);
+  font-weight: 700;
 }
+
 .profile-meta {
   margin: 0 0 4px;
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
 }
+
 .profile-bio {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   line-height: 1.6;
 }
+
 .profile-stats {
   display: flex;
-  gap: 24px;
+  gap: 32px;
 }
-.profile-stats span {
-  font-size: 13px;
-  color: #6b7280;
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
-.profile-stats strong {
-  font-size: 18px;
-  color: #1f2937;
-  margin-right: 4px;
+
+.stat-item strong {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
 }
+
+.stat-item span {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* Panel */
 .panel {
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
 }
+
 .panel-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-bottom: 16px;
 }
-.panel-header h2 {
-  margin: 0;
-  font-size: 18px;
-  color: #1f2937;
-}
+
 .panel-count {
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
 }
-.favorite-list,
-.published-list {
+
+.item-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
+
 .publish-time {
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   display: flex;
   align-items: center;
   gap: 4px;
