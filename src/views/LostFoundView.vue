@@ -12,18 +12,48 @@
     </div>
 
     <EmptyState v-if="filteredList.length === 0" text="暂无失物招领信息" />
+
     <div v-else class="list-wrap">
-      <ItemCard v-for="item in filteredList" :key="item.id" :item="item">
-        <div class="item-tags">
-          <el-tag :type="item.type === 'lost' ? 'danger' : 'success'" size="small">
-            {{ item.type === 'lost' ? '寻物' : '拾物' }}
-          </el-tag>
-          <el-tag :type="item.status === 'open' ? 'warning' : 'info'" size="small">
-            {{ item.status === 'open' ? '待认领' : '已完成' }}
-          </el-tag>
-        </div>
-        <p><el-icon><Goods /></el-icon> <strong>{{ item.itemName }}</strong> | <el-icon><Location /></el-icon> {{ item.location }}</p>
-        <p><el-icon><Phone /></el-icon> {{ item.contact }}</p>
+      <ItemCard
+        v-for="item in filteredList"
+        :key="item.id"
+        :title="item.title"
+        :description="item.description"
+        :location="item.location"
+      >
+        <template #tag>
+          <div class="item-tags">
+            <el-tag :type="item.type === 'lost' ? 'danger' : 'success'" size="small">
+              {{ item.type === 'lost' ? '寻物' : '拾物' }}
+            </el-tag>
+            <el-tag :type="item.status === 'open' ? 'warning' : 'info'" size="small">
+              {{ item.status === 'open' ? '待认领' : '已完成' }}
+            </el-tag>
+          </div>
+        </template>
+        <template #footer>
+          <span class="item-meta">
+            <el-icon><Goods /></el-icon> {{ item.itemName }}
+          </span>
+          <span class="item-meta">
+            <el-icon><Phone /></el-icon> {{ item.contact }}
+          </span>
+          <el-button
+            :type="favoriteStore.isFavorite('lostFound', item.id) ? 'warning' : 'default'"
+            :icon="favoriteStore.isFavorite('lostFound', item.id) ? 'StarFilled' : 'Star'"
+            size="small"
+            round
+            @click="favoriteStore.toggleFavorite({
+              id: item.id,
+              type: 'lostFound',
+              title: item.title,
+              description: item.description,
+              location: item.location
+            })"
+          >
+            {{ favoriteStore.isFavorite('lostFound', item.id) ? '已收藏' : '收藏' }}
+          </el-button>
+        </template>
       </ItemCard>
     </div>
   </div>
@@ -34,7 +64,9 @@ import { ref, computed, onMounted } from 'vue'
 import { getLostFounds, type LostFoundItem } from '@/api/lostFound'
 import ItemCard from '@/components/ItemCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import { useFavoriteStore } from '@/stores/favorite'
 
+const favoriteStore = useFavoriteStore()
 const filterType = ref('')
 const lostFounds = ref<LostFoundItem[]>([])
 
@@ -51,29 +83,8 @@ onMounted(async () => {
 
 <style scoped>
 .page { padding: 0; }
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-.page-header h1 {
-  margin: 0;
-  font-size: 22px;
-  color: #1f2937;
-}
-
-.item-tags {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-:deep(p) {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+.page-header h1 { margin: 0; font-size: 22px; color: #1f2937; }
+.item-tags { display: flex; gap: 6px; flex-shrink: 0; }
+.item-meta { font-size: 13px; color: #6b7280; display: flex; align-items: center; gap: 4px; }
 </style>

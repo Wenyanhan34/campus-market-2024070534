@@ -238,12 +238,14 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Goods, WarningFilled, UserFilled, Van } from '@element-plus/icons-vue'
 import FormField from '../components/FormField.vue'
+import { useUserStore } from '../stores/user'
 import { createTrade } from '../api/trade'
 import { createLostFound } from '../api/lostFound'
 import { createGroupBuy } from '../api/groupBuy'
 import { createErrand } from '../api/errand'
 
 const router = useRouter()
+const userStore = useUserStore()
 
 const publishType = ref('trade')
 const submitting = ref(false)
@@ -337,7 +339,7 @@ function validateForm(): boolean {
 
 function buildSubmitData() {
   const base = {
-    publisher: 'student01',
+    publisher: userStore.displayName,
     status: 'open' as const,
   }
 
@@ -404,7 +406,8 @@ const labelMap: Record<string, string> = {
   errand: '跑腿委托',
 }
 
-const createMap: Record<string, (data: Record<string, unknown>) => Promise<unknown>> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const createMap: Record<string, (data: any) => Promise<unknown>> = {
   trade: createTrade,
   lost: createLostFound,
   group: createGroupBuy,
