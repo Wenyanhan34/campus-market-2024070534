@@ -153,7 +153,7 @@ async function loadData() {
     }
     const res = await getGroupBuyById(id)
     item.value = res.data
-    mainImage.value = `https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=800&h=500&fit=crop&sig=${id}`
+    mainImage.value = res.data.image || `https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=800&h=500&fit=crop&sig=${id}`
   } catch {
     error.value = true
   } finally {

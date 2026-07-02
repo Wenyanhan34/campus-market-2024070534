@@ -242,7 +242,12 @@
                 </el-col>
               </el-row>
             </template>
-          </template>
+
+            <el-divider style="margin: 8px 0 16px;" />
+            <FormField label="图片链接">
+              <el-input v-model="form.image" placeholder="可选，输入商品图片 URL（如 https://picsum.photos/seed/xxx/400/300）" />
+            </FormField>
+            </template>
 
           <!-- 按钮区 -->
           <div class="form-actions">
@@ -324,6 +329,7 @@ const initialState = {
   reward: undefined as number | undefined,
   from: '',
   to: '',
+  image: '',
 }
 
 const form = reactive({ ...initialState })
@@ -427,7 +433,7 @@ function buildSubmitData() {
       location: form.location.trim(),
       description: form.description.trim(),
       publishTime: new Date().toISOString().slice(0, 10),
-      image: '',
+      image: form.image || '',
     }
   }
   if (publishType.value === 'lost') {
@@ -440,6 +446,7 @@ function buildSubmitData() {
       eventTime: form.eventTime,
       contact: form.contact.trim(),
       description: form.description.trim(),
+      image: form.image || '',
     }
   }
   if (publishType.value === 'group') {
@@ -452,6 +459,7 @@ function buildSubmitData() {
       deadline: form.deadline,
       location: form.location.trim(),
       description: form.description.trim(),
+      image: form.image || '',
     }
   }
   return {
@@ -463,6 +471,7 @@ function buildSubmitData() {
     to: form.to.trim(),
     deadline: form.deadline,
     description: form.description.trim(),
+    image: form.image || '',
   }
 }
 
@@ -489,6 +498,12 @@ const createMap: Record<string, (data: any) => Promise<unknown>> = {
 }
 
 async function handleSubmit() {
+  if (!userStore.isLoggedIn || !userStore.currentUser) {
+    ElMessage.warning('请先登录后再发布信息')
+    router.push('/login')
+    return
+  }
+
   if (!validateForm()) {
     ElMessage.warning('请完善表单后再提交')
     return

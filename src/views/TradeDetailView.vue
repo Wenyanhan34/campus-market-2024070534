@@ -125,14 +125,15 @@
       <div class="related-section">
         <h2 class="related-title">相关推荐</h2>
         <div class="related-grid">
-          <div
+          <router-link
             v-for="r in relatedItems"
             :key="r.id"
+            :to="`/trade/${r.id}`"
             class="related-card"
-            @click="$router.push(`/trade/${r.id}`)"
           >
             <div class="related-img-wrap">
-              <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <img v-if="r.image" class="related-img-real" :src="r.image" alt="" loading="lazy" @error="relatedImgErrored[r.id] = true" />
+              <svg v-if="!r.image || relatedImgErrored[r.id]" width="48" height="48" viewBox="0 0 48 48" fill="none">
                 <rect x="4" y="4" width="40" height="40" rx="8" fill="#E5E7EB"/>
                 <path d="M16 24h16M24 16v16" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round"/>
               </svg>
@@ -141,7 +142,7 @@
               <div class="related-item-title">{{ r.title }}</div>
               <div class="related-price">¥{{ r.price }}</div>
             </div>
-          </div>
+          </router-link>
         </div>
       </div>
     </template>
@@ -192,6 +193,7 @@ const reportVisible = ref(false)
 const reportReason = ref('')
 const reportDesc = ref('')
 const relatedItems = ref<TradeItem[]>([])
+const relatedImgErrored = ref<Record<number, boolean>>({})
 
 const viewCount = computed(() => Math.floor(Math.random() * 200) + 30)
 
@@ -231,7 +233,7 @@ async function loadData() {
     const res = await getTradeById(id)
     item.value = res.data
 
-    mainImage.value = `https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=800&h=600&fit=crop&sig=${id}`
+    mainImage.value = res.data.image || `https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=800&h=600&fit=crop&sig=${id}`
     images.value = [
       mainImage.value,
       `https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&h=600&fit=crop&sig=${id}`,
@@ -464,12 +466,15 @@ onMounted(() => {
 }
 
 .related-card {
+  display: block;
   background: var(--color-bg-white);
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
+  text-decoration: none;
+  color: inherit;
 }
 
 .related-card:hover {
@@ -483,6 +488,16 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   background: var(--color-bg);
+  overflow: hidden;
+  position: relative;
+}
+
+.related-img-real {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .related-body {

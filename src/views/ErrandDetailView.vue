@@ -140,7 +140,7 @@ async function loadData() {
     }
     const res = await getErrandById(id)
     item.value = res.data
-    mainImage.value = `https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=500&fit=crop&sig=${id}`
+    mainImage.value = res.data.image || `https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=500&fit=crop&sig=${id}`
   } catch {
     error.value = true
   } finally {

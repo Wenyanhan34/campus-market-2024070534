@@ -2,7 +2,8 @@
   <el-card class="item-card" shadow="hover" body-style="padding: 0">
     <div class="card-inner">
       <div class="card-img" :style="{ background: imgGradient }">
-        <div class="img-placeholder">
+        <img v-if="image" class="card-img-real" :src="image" alt="" loading="lazy" @error="imgError = true" />
+        <div v-if="!image || imgError" class="img-placeholder">
           <el-icon :size="36" color="rgba(255,255,255,0.5)"><Picture /></el-icon>
         </div>
         <div class="img-category-tag">
@@ -25,14 +26,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps<{
   title: string
   description: string
   location?: string
   categoryColor?: string
+  image?: string
 }>()
+
+const imgError = ref(false)
 
 const gradients: Record<string, string> = {
   trade: 'linear-gradient(135deg, #2563eb, #7c3aed)',
@@ -91,6 +95,14 @@ const imgGradient = computed(() => {
   left: 10px;
   display: flex;
   gap: 4px;
+}
+
+.card-img-real {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .img-category-tag :deep(.el-tag) {

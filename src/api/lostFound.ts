@@ -11,6 +11,7 @@ export interface LostFoundItem {
   publisher?: string
   status: string
   description: string
+  image?: string
 }
 
 export function getLostFounds() {

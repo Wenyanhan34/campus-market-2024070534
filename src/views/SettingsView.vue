@@ -66,22 +66,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { InfoFilled } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 
+const router = useRouter()
 const userStore = useUserStore()
 
-const form = ref({
-  name: userStore.currentUser.name,
-  college: userStore.currentUser.college,
-  grade: userStore.currentUser.grade,
-  campus: userStore.currentUser.campus,
-  role: userStore.currentUser.role,
-  contact: userStore.currentUser.contact,
-  bio: userStore.currentUser.bio,
+onMounted(() => {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录')
+    router.push('/login')
+  }
 })
+
+const cur = userStore.currentUser!
+const defaultForm = {
+  name: cur.name,
+  college: cur.college,
+  grade: cur.grade,
+  campus: cur.campus || '',
+  role: cur.role || '',
+  contact: cur.contact || '',
+  bio: cur.bio,
+}
+
+const form = ref({ ...defaultForm })
 
 function save() {
   userStore.updateProfile(form.value)
@@ -89,15 +101,7 @@ function save() {
 }
 
 function reset() {
-  form.value = {
-    name: userStore.currentUser.name,
-    college: userStore.currentUser.college,
-    grade: userStore.currentUser.grade,
-    campus: userStore.currentUser.campus,
-    role: userStore.currentUser.role,
-    contact: userStore.currentUser.contact,
-    bio: userStore.currentUser.bio,
-  }
+  form.value = { ...defaultForm }
   ElMessage.info('已重置')
 }
 </script>

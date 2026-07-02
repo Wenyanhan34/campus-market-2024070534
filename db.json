@@ -1,4 +1,26 @@
 {
+  "users": [
+    {
+      "id": 1,
+      "username": "student",
+      "password": "123456",
+      "name": "校园用户",
+      "college": "计算机学院",
+      "grade": "2023级",
+      "avatar": "",
+      "bio": "热爱校园生活，喜欢分享闲置好物。"
+    },
+    {
+      "username": "丽丽",
+      "password": "123456",
+      "name": "张三",
+      "college": "计算机科学学院",
+      "grade": "2024级",
+      "avatar": "",
+      "bio": "这个同学还没有填写个人简介。",
+      "id": 2
+    }
+  ],
   "trades": [
     {
       "id": 1,
@@ -9,7 +31,7 @@
       "publisher": "student01",
       "publishTime": "2026-06-20",
       "location": "一食堂楼下自提",
-      "image": "",
+      "image": "https://picsum.photos/seed/trade1/400/300",
       "status": "open",
       "description": "教材保存完好，内页有少量笔记，不影响阅读使用。"
     },
@@ -22,7 +44,7 @@
       "publisher": "student02",
       "publishTime": "2026-06-22",
       "location": "3栋男生宿舍楼下",
-      "image": "",
+      "image": "https://picsum.photos/seed/trade2/400/300",
       "status": "open",
       "description": "使用不到三个月，因升级设备转让，包装配件齐全。"
     },
@@ -35,7 +57,7 @@
       "publisher": "student01",
       "publishTime": "2026-06-23",
       "location": "5栋宿舍",
-      "image": "",
+      "image": "https://picsum.photos/seed/trade3/400/300",
       "status": "closed",
       "description": "桌面有轻微使用痕迹，结构稳固，适合宿舍使用。"
     },
@@ -48,7 +70,7 @@
       "publisher": "student03",
       "publishTime": "2026-06-25",
       "location": "图书馆门口",
-      "image": "",
+      "image": "https://picsum.photos/seed/trade4/400/300",
       "status": "open",
       "description": "近三年真题全套，全新未写，附答案解析。"
     },
@@ -61,7 +83,7 @@
       "publisher": "student02",
       "publishTime": "2026-06-26",
       "location": "二食堂门口",
-      "image": "",
+      "image": "https://picsum.photos/seed/trade5/400/300",
       "status": "open",
       "description": "买多了，全新未拆封，USB供电，静音效果很好。"
     },
@@ -75,7 +97,7 @@
       "location": "第一教学楼",
       "description": "近5年英语四级真题，附赠必考词汇",
       "publishTime": "2026-06-30",
-      "image": "",
+      "image": "https://picsum.photos/seed/trade6/400/300",
       "id": 6
     },
     {
@@ -88,7 +110,7 @@
       "location": "第一教学楼",
       "description": "全新未拆封，附赠词汇书",
       "publishTime": "2026-07-02",
-      "image": "",
+      "image": "https://picsum.photos/seed/trade7/400/300",
       "id": 7
     }
   ],
@@ -102,7 +124,8 @@
       "eventTime": "2026-06-20 15:00",
       "contact": "微信：student01",
       "status": "open",
-      "description": "耳机侧面印有白色logo，对本人很重要，感谢归还。"
+      "description": "耳机侧面印有白色logo，对本人很重要，感谢归还。",
+      "image": "https://picsum.photos/seed/lost1/400/300"
     },
     {
       "id": 2,
@@ -113,7 +136,8 @@
       "eventTime": "2026-06-21 12:10",
       "contact": "3栋302宿舍",
       "status": "open",
-      "description": "卡面贴有动漫贴纸，失主可到3栋302认领。"
+      "description": "卡面贴有动漫贴纸，失主可到3栋302认领。",
+      "image": "https://picsum.photos/seed/lost2/400/300"
     },
     {
       "id": 3,
@@ -124,7 +148,8 @@
       "eventTime": "2026-06-22 18:30",
       "contact": "student02",
       "status": "done",
-      "description": "伞柄有明显磨损痕迹，黑色伞面，望拾到者联系。"
+      "description": "伞柄有明显磨损痕迹，黑色伞面，望拾到者联系。",
+      "image": "https://picsum.photos/seed/lost3/400/300"
     },
     {
       "id": 4,
@@ -135,7 +160,8 @@
       "eventTime": "2026-06-24 17:00",
       "contact": "4栋201宿舍",
       "status": "open",
-      "description": "杯身印有本校校徽，失主可到4栋201领取。"
+      "description": "杯身印有本校校徽，失主可到4栋201领取。",
+      "image": "https://picsum.photos/seed/lost4/400/300"
     },
     {
       "id": 5,
@@ -146,7 +172,8 @@
       "eventTime": "2026-06-25 10:20",
       "contact": "student03",
       "status": "open",
-      "description": "外壳粉色，附带一根数据线，充电宝容量为20000mAh。"
+      "description": "外壳粉色，附带一根数据线，充电宝容量为20000mAh。",
+      "image": "https://picsum.photos/seed/lost5/400/300"
     }
   ],
   "groupBuys": [
@@ -160,7 +187,8 @@
       "location": "校门口奶茶店",
       "publisher": "student01",
       "status": "open",
-      "description": "满50减20活动，AA制，每人约6元，口味自选。"
+      "description": "满50减20活动，AA制，每人约6元，口味自选。",
+      "image": "https://picsum.photos/seed/group1/400/300"
     },
     {
       "id": 2,
@@ -172,7 +200,8 @@
       "location": "校门口水果店",
       "publisher": "student02",
       "status": "open",
-      "description": "整西瓜团购，单个约10斤，价格比零售便宜30%。"
+      "description": "整西瓜团购，单个约10斤，价格比零售便宜30%。",
+      "image": "https://picsum.photos/seed/group2/400/300"
     },
     {
       "id": 3,
@@ -184,7 +213,8 @@
       "location": "校内体育馆羽毛球场",
       "publisher": "student03",
       "status": "closed",
-      "description": "双打组队，水平不限，球拍自备，场地费AA。"
+      "description": "双打组队，水平不限，球拍自备，场地费AA。",
+      "image": "https://picsum.photos/seed/group3/400/300"
     },
     {
       "id": 4,
@@ -196,7 +226,8 @@
       "location": "3栋宿舍楼下集合",
       "publisher": "student01",
       "status": "open",
-      "description": "凑满减优惠，预计每人可省8-10元，统一配送。"
+      "description": "凑满减优惠，预计每人可省8-10元，统一配送。",
+      "image": "https://picsum.photos/seed/group4/400/300"
     },
     {
       "id": 5,
@@ -208,7 +239,8 @@
       "location": "图书馆一楼自习区",
       "publisher": "student02",
       "status": "open",
-      "description": "期末复习组队，互相监督，每天固定时间自习。"
+      "description": "期末复习组队，互相监督，每天固定时间自习。",
+      "image": "https://picsum.photos/seed/group5/400/300"
     }
   ],
   "errands": [
@@ -222,7 +254,8 @@
       "deadline": "2026-06-29 07:20",
       "publisher": "student01",
       "status": "open",
-      "description": "早餐已点好，只需要到窗口取餐送到3栋楼下即可。"
+      "description": "早餐已点好，只需要到窗口取餐送到3栋楼下即可。",
+      "image": "https://picsum.photos/seed/errand1/400/300"
     },
     {
       "id": 2,
@@ -234,7 +267,8 @@
       "deadline": "2026-06-28 19:00",
       "publisher": "student02",
       "status": "open",
-      "description": "小件快递，取件码会发给你，送到5栋楼下即可。"
+      "description": "小件快递，取件码会发给你，送到5栋楼下即可。",
+      "image": "https://picsum.photos/seed/errand2/400/300"
     },
     {
       "id": 3,
@@ -246,7 +280,8 @@
       "deadline": "2026-06-28 14:00",
       "publisher": "student03",
       "status": "done",
-      "description": "重要文件需在14:00前送达，请准时送到指定办公室。"
+      "description": "重要文件需在14:00前送达，请准时送到指定办公室。",
+      "image": "https://picsum.photos/seed/errand3/400/300"
     },
     {
       "id": 4,
@@ -258,7 +293,8 @@
       "deadline": "2026-06-29 11:30",
       "publisher": "student01",
       "status": "open",
-      "description": "购物清单微信发送，费用实报实销，送到4栋楼下。"
+      "description": "购物清单微信发送，费用实报实销，送到4栋楼下。",
+      "image": "https://picsum.photos/seed/errand4/400/300"
     },
     {
       "id": 5,
@@ -270,7 +306,8 @@
       "deadline": "2026-06-28 16:00",
       "publisher": "student02",
       "status": "open",
-      "description": "两本书需要从1栋送到图书馆三楼自习区指定座位。"
+      "description": "两本书需要从1栋送到图书馆三楼自习区指定座位。",
+      "image": "https://picsum.photos/seed/errand5/400/300"
     }
   ]
 }

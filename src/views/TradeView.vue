@@ -49,6 +49,7 @@
         :title="item.title"
         :description="item.description"
         :location="item.location"
+        :image="item.image"
         category-color="trade"
       >
         <template #tag>

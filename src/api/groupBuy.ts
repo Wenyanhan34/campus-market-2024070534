@@ -11,6 +11,7 @@ export interface GroupBuyItem {
   publisher: string
   status: string
   description: string
+  image?: string
 }
 
 export function getGroupBuys() {

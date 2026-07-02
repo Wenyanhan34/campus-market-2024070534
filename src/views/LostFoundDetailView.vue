@@ -148,7 +148,7 @@ async function loadData() {
     }
     const res = await getLostFoundById(id)
     item.value = res.data
-    mainImage.value = `https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&h=600&fit=crop&sig=${id}`
+    mainImage.value = res.data.image || `https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&h=600&fit=crop&sig=${id}`
   } catch {
     error.value = true
   } finally {

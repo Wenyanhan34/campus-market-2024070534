@@ -1,5 +1,14 @@
 <template>
   <div class="page">
+    <div v-if="!userStore.isLoggedIn" class="unauthenticated">
+      <el-card shadow="never" class="unauth-card">
+        <h2>请先登录</h2>
+        <p>登录后可以查看个人资料、我的收藏和我的发布。</p>
+        <el-button type="primary" size="large" @click="$router.push('/login')">去登录</el-button>
+      </el-card>
+    </div>
+
+    <template v-else>
     <div class="layout-grid">
       <!-- Sidebar -->
       <aside class="sidebar">
@@ -70,7 +79,8 @@
           <div v-else class="post-list">
             <div v-for="item in filteredPublished" :key="`${item.type}-${item.id}`" class="post-item">
               <div class="post-img">
-                <el-icon :size="28" color="rgba(255,255,255,0.5)"><Picture /></el-icon>
+                <img v-if="item.image" class="post-img-real" :src="item.image" alt="" loading="lazy" @error="imgErrors[`post-${item.type}-${item.id}`] = true" />
+                <el-icon v-if="!item.image || imgErrors[`post-${item.type}-${item.id}`]" :size="28" color="rgba(255,255,255,0.5)"><Picture /></el-icon>
               </div>
               <div class="post-body">
                 <div class="post-head">
@@ -114,7 +124,8 @@
               @click="goDetail(item)"
             >
               <div class="fav-img">
-                <el-icon :size="32" color="rgba(255,255,255,0.4)"><Picture /></el-icon>
+                <img v-if="item.image" class="post-img-real" :src="item.image" alt="" loading="lazy" @error="imgErrors[`fav-${item.type}-${item.id}`] = true" />
+                <el-icon v-if="!item.image || imgErrors[`fav-${item.type}-${item.id}`]" :size="32" color="rgba(255,255,255,0.4)"><Picture /></el-icon>
               </div>
               <div class="fav-body">
                 <div class="fav-title">{{ item.title }}</div>
@@ -139,6 +150,7 @@
         </template>
       </div>
     </div>
+    </template>
 
     <!-- Edit Dialog -->
     <el-dialog v-model="showEditDialog" title="编辑个人资料" width="520px" top="8vh" @open="syncEditForm">
@@ -191,16 +203,19 @@ const router = useRouter()
 const userStore = useUserStore()
 const favoriteStore = useFavoriteStore()
 
+const imgErrors = ref<Record<string, boolean>>({})
+
 const activeTab = ref('favorites')
 const postFilter = ref('all')
 const showEditDialog = ref(false)
+const cu = userStore.currentUser!
 const editForm = ref({
-  name: userStore.currentUser.name,
-  college: userStore.currentUser.college,
-  grade: userStore.currentUser.grade,
-  campus: userStore.currentUser.campus,
-  contact: userStore.currentUser.contact,
-  bio: userStore.currentUser.bio,
+  name: cu.name,
+  college: cu.college,
+  grade: cu.grade,
+  campus: cu.campus || '',
+  contact: cu.contact || '',
+  bio: cu.bio,
 })
 
 const trades = ref<TradeItem[]>([])
@@ -299,13 +314,14 @@ function goSettings() {
 }
 
 function syncEditForm() {
+  const c = userStore.currentUser!
   editForm.value = {
-    name: userStore.currentUser.name,
-    college: userStore.currentUser.college,
-    grade: userStore.currentUser.grade,
-    campus: userStore.currentUser.campus,
-    contact: userStore.currentUser.contact,
-    bio: userStore.currentUser.bio,
+    name: c.name,
+    college: c.college,
+    grade: c.grade,
+    campus: c.campus || '',
+    contact: c.contact || '',
+    bio: c.bio,
   }
 }
 
@@ -486,6 +502,16 @@ function saveProfile() {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.post-img-real {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .post-body {
@@ -572,5 +598,29 @@ function saveProfile() {
   align-items: center;
   justify-content: space-between;
   margin-top: 8px;
+}
+
+.unauthenticated {
+  display: flex;
+  justify-content: center;
+  padding-top: 60px;
+}
+
+.unauth-card {
+  width: 400px;
+  text-align: center;
+  padding: 16px;
+}
+
+.unauth-card h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  color: var(--color-text);
+}
+
+.unauth-card p {
+  margin: 0 0 20px;
+  color: var(--color-text-muted);
+  font-size: 14px;
 }
 </style>

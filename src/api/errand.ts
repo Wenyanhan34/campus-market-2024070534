@@ -11,6 +11,7 @@ export interface ErrandItem {
   publisher: string
   status: string
   description: string
+  image?: string
 }
 
 export function getErrands() {

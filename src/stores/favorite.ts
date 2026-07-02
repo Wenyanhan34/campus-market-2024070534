@@ -6,6 +6,7 @@ export interface FavoriteItem {
   title: string
   description: string
   location?: string
+  image?: string
 }
 
 export const useFavoriteStore = defineStore('favorite', {

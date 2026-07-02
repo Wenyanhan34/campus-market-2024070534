@@ -24,32 +24,40 @@
             clearable
           />
         </div>
-        <el-dropdown trigger="click" @command="handleCommand">
-          <div class="user-mini">
-            <el-avatar :size="36" class="user-avatar">
-              {{ userStore.userInitial }}
-            </el-avatar>
-            <span class="user-name">{{ userStore.displayName }}</span>
-            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+        <template v-if="userStore.isLoggedIn">
+          <el-dropdown trigger="click" @command="handleCommand">
+            <div class="user-mini">
+              <el-avatar :size="36" class="user-avatar">
+                {{ userStore.userInitial }}
+              </el-avatar>
+              <span class="user-name">{{ userStore.displayName }}</span>
+              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="/user">
+                  <el-icon><Avatar /></el-icon>个人中心
+                </el-dropdown-item>
+                <el-dropdown-item command="/publish">
+                  <el-icon><Plus /></el-icon>发布信息
+                </el-dropdown-item>
+                <el-dropdown-item command="/message">
+                  <el-icon><Message /></el-icon>消息中心
+                  <el-tag size="small" type="danger" round class="msg-badge">2</el-tag>
+                </el-dropdown-item>
+                <el-dropdown-item divided command="logout">
+                  <el-icon><SwitchButton /></el-icon>退出登录
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </template>
+        <template v-else>
+          <div class="auth-links">
+            <router-link to="/login" class="auth-link login-link">登录</router-link>
+            <router-link to="/register" class="auth-link register-link">注册</router-link>
           </div>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="/user">
-                <el-icon><Avatar /></el-icon>个人中心
-              </el-dropdown-item>
-              <el-dropdown-item command="/publish">
-                <el-icon><Plus /></el-icon>发布信息
-              </el-dropdown-item>
-              <el-dropdown-item command="/message">
-                <el-icon><Message /></el-icon>消息中心
-                <el-tag size="small" type="danger" round class="msg-badge">2</el-tag>
-              </el-dropdown-item>
-              <el-dropdown-item divided command="logout">
-                <el-icon><SwitchButton /></el-icon>退出登录
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+        </template>
       </div>
     </div>
   </header>
@@ -231,5 +239,38 @@ onUnmounted(() => {
 
 .msg-badge {
   margin-left: 4px;
+}
+
+.auth-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-link {
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.login-link {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.login-link:hover {
+  background: var(--color-primary-lighter);
+}
+
+.register-link {
+  color: #fff;
+  background: var(--color-primary);
+}
+
+.register-link:hover {
+  background: var(--color-primary-hover);
 }
 </style>
