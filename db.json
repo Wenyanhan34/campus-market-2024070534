@@ -122,6 +122,19 @@
       "publishTime": "2026-07-02",
       "image": "https://picsum.photos/seed/trade7/400/300",
       "id": 7
+    },
+    {
+      "publisher": "王五",
+      "status": "open",
+      "title": "六级资料",
+      "price": 25,
+      "category": "教材教辅",
+      "condition": "全新",
+      "location": "教学楼",
+      "description": "全新未拆封，感兴趣私聊",
+      "publishTime": "2026-07-02",
+      "image": "",
+      "id": 8
     }
   ],
   "lostFounds": [

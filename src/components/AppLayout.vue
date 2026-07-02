@@ -1,6 +1,10 @@
 <template>
   <div class="app-layout">
     <AppHeader />
+    <div v-if="isAuthPage" class="back-float" @click="$router.push('/')">
+      <el-icon><ArrowLeft /></el-icon>
+      <span>返回首页</span>
+    </div>
     <main class="app-main">
       <RouterView v-slot="{ Component }">
         <Transition name="page" mode="out-in">
@@ -24,7 +28,12 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AppHeader from './AppHeader.vue'
+
+const route = useRoute()
+const isAuthPage = computed(() => route.name === 'login' || route.name === 'register')
 
 const year = new Date().getFullYear()
 </script>
@@ -35,6 +44,33 @@ const year = new Date().getFullYear()
   display: flex;
   flex-direction: column;
   background: var(--color-bg);
+  position: relative;
+}
+
+.back-float {
+  position: fixed;
+  top: calc(var(--header-height) + 12px);
+  left: 24px;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--color-primary);
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.back-float:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-lg);
 }
 
 .app-main {

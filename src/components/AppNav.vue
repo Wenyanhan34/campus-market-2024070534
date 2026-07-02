@@ -31,7 +31,7 @@ const allLinks = [
 
 const navLinks = computed(() => {
   if (userStore.isLoggedIn) return allLinks
-  return allLinks.filter(l => l.path === '/')
+  return []
 })
 </script>
 
