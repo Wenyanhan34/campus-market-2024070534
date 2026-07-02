@@ -14,7 +14,7 @@
         <AppNav />
       </div>
       <div class="header-right">
-        <div class="search-wrapper">
+        <div v-if="userStore.isLoggedIn" class="search-wrapper">
           <el-input
             v-model="searchText"
             placeholder="搜索商品、失物、拼单..."
@@ -37,13 +37,6 @@
               <el-dropdown-menu>
                 <el-dropdown-item command="/user">
                   <el-icon><Avatar /></el-icon>个人中心
-                </el-dropdown-item>
-                <el-dropdown-item command="/publish">
-                  <el-icon><Plus /></el-icon>发布信息
-                </el-dropdown-item>
-                <el-dropdown-item command="/message">
-                  <el-icon><Message /></el-icon>消息中心
-                  <el-tag size="small" type="danger" round class="msg-badge">2</el-tag>
                 </el-dropdown-item>
                 <el-dropdown-item divided command="logout">
                   <el-icon><SwitchButton /></el-icon>退出登录

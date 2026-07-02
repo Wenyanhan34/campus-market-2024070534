@@ -14,7 +14,12 @@
 </template>
 
 <script setup lang="ts">
-const navLinks = [
+import { computed } from 'vue'
+import { useUserStore } from '../stores/user'
+
+const userStore = useUserStore()
+
+const allLinks = [
   { path: '/', label: '首页', icon: 'HomeFilled' },
   { path: '/trade', label: '二手交易', icon: 'Goods' },
   { path: '/lost-found', label: '失物招领', icon: 'Search' },
@@ -22,8 +27,12 @@ const navLinks = [
   { path: '/errand', label: '跑腿委托', icon: 'Van' },
   { path: '/publish', label: '发布', icon: 'Plus' },
   { path: '/message', label: '消息', icon: 'Message', badge: '2' },
-  { path: '/user', label: '我的', icon: 'Avatar' },
 ]
+
+const navLinks = computed(() => {
+  if (userStore.isLoggedIn) return allLinks
+  return allLinks.filter(l => l.path === '/')
+})
 </script>
 
 <style scoped>

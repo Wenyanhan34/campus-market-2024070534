@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '../stores/user'
 
 import HomeView from '../views/HomeView.vue'
 import TradeView from '../views/TradeView.vue'
@@ -50,6 +51,7 @@ const router = createRouter({
       component: TradeView,
       meta: {
         title: '二手交易',
+        requiresAuth: true,
       },
     },
     {
@@ -58,6 +60,7 @@ const router = createRouter({
       component: TradeDetailView,
       meta: {
         title: '商品详情',
+        requiresAuth: true,
       },
     },
     {
@@ -66,6 +69,7 @@ const router = createRouter({
       component: LostFoundView,
       meta: {
         title: '失物招领',
+        requiresAuth: true,
       },
     },
     {
@@ -74,6 +78,7 @@ const router = createRouter({
       component: LostFoundDetailView,
       meta: {
         title: '失物招领详情',
+        requiresAuth: true,
       },
     },
     {
@@ -82,6 +87,7 @@ const router = createRouter({
       component: GroupBuyView,
       meta: {
         title: '拼单搭子',
+        requiresAuth: true,
       },
     },
     {
@@ -90,6 +96,7 @@ const router = createRouter({
       component: GroupBuyDetailView,
       meta: {
         title: '拼单详情',
+        requiresAuth: true,
       },
     },
     {
@@ -98,6 +105,7 @@ const router = createRouter({
       component: ErrandView,
       meta: {
         title: '跑腿委托',
+        requiresAuth: true,
       },
     },
     {
@@ -106,6 +114,7 @@ const router = createRouter({
       component: ErrandDetailView,
       meta: {
         title: '跑腿任务详情',
+        requiresAuth: true,
       },
     },
     {
@@ -114,6 +123,7 @@ const router = createRouter({
       component: PublishView,
       meta: {
         title: '发布信息',
+        requiresAuth: true,
       },
     },
     {
@@ -122,6 +132,7 @@ const router = createRouter({
       component: MessageView,
       meta: {
         title: '消息中心',
+        requiresAuth: true,
       },
     },
     {
@@ -130,6 +141,7 @@ const router = createRouter({
       component: ChatDetailView,
       meta: {
         title: '聊天',
+        requiresAuth: true,
       },
     },
     {
@@ -138,6 +150,7 @@ const router = createRouter({
       component: UserCenterView,
       meta: {
         title: '个人中心',
+        requiresAuth: true,
       },
     },
     {
@@ -146,14 +159,24 @@ const router = createRouter({
       component: SettingsView,
       meta: {
         title: '账号设置',
+        requiresAuth: true,
       },
     },
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach((to, _from, next) => {
   const title = (to.meta?.title as string) || '校园轻集市'
   document.title = `${title} — 校园轻集市`
+
+  if (to.meta.requiresAuth) {
+    const userStore = useUserStore()
+    if (!userStore.isLoggedIn) {
+      next({ path: '/login', query: { redirect: to.fullPath } })
+      return
+    }
+  }
+  next()
 })
 
 export default router
