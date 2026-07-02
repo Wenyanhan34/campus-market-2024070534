@@ -1,170 +1,149 @@
 <template>
   <div class="page">
-    <div class="page-header">
-      <h1>消息中心</h1>
-    </div>
-
-    <el-card shadow="never" class="message-card">
-      <div class="message-layout">
-        <div class="msg-sidebar">
-          <div class="sidebar-header">
-            <el-input
-              v-model="searchContact"
-              placeholder="搜索联系人..."
-              :prefix-icon="Search"
-              size="small"
-              clearable
-            />
+    <div class="message-layout">
+      <div class="msg-sidebar">
+        <div class="sidebar-title">消息列表</div>
+        <div class="contact-list">
+          <div
+            v-for="(conv, idx) in store.conversations"
+            :key="conv.name"
+            class="contact-item"
+            :class="{ active: activeIndex === idx }"
+            @click="switchConversation(idx)"
+          >
+            <el-avatar :size="44" class="contact-avatar">{{ conv.name.charAt(0) }}</el-avatar>
+            <div class="contact-info">
+              <div class="contact-name">{{ conv.name }}</div>
+              <div class="contact-preview">{{ conv.lastMsg }}</div>
+            </div>
+            <div class="contact-right">
+              <div class="contact-time">{{ conv.time }}</div>
+              <el-badge v-if="conv.unread" :value="conv.unread" class="unread-badge" />
+            </div>
           </div>
-          <div class="contact-list">
-            <div
-              v-for="contact in filteredContacts"
-              :key="contact.name"
-              class="contact-item"
-              :class="{ active: activeContact === contact.name }"
-              @click="activeContact = contact.name"
-            >
-              <el-avatar :size="40" class="contact-avatar">
-                {{ contact.name[0] }}
-              </el-avatar>
-              <div class="contact-info">
-                <div class="contact-top">
-                  <span class="contact-name">{{ contact.name }}</span>
-                  <span class="contact-time">{{ contact.time }}</span>
-                </div>
-                <p class="contact-preview">{{ contact.text }}</p>
-              </div>
-              <span v-if="contact.unread" class="unread-badge">{{ contact.unread }}</span>
+        </div>
+      </div>
+
+      <div class="chat-area">
+        <div class="chat-header">
+          <div class="chat-header-left">
+            <el-avatar :size="36" class="chat-avatar">{{ currentConv.name.charAt(0) }}</el-avatar>
+            <span class="chat-name">{{ currentConv.name }}</span>
+          </div>
+          <el-button text size="small" @click="openFullChat">
+            <el-icon><FullScreen /></el-icon> 全屏聊天
+          </el-button>
+        </div>
+
+        <div ref="chatBodyRef" class="chat-messages">
+          <div
+            v-for="(msg, idx) in currentConv.messages"
+            :key="idx"
+            class="msg-row"
+            :class="{ 'msg-me': msg.isMe }"
+          >
+            <div class="msg-bubble-wrap">
+              <div class="msg-bubble">{{ msg.text }}</div>
+              <div class="msg-time">{{ msg.time }}</div>
             </div>
           </div>
         </div>
 
-        <div class="msg-content-area">
-          <el-tabs v-model="activeTab" class="msg-tabs">
-            <el-tab-pane label="私信" name="private">
-              <div v-if="activeContact" class="conversation">
-                <div class="conv-header">
-                  <el-avatar :size="36">{{ activeContact[0] }}</el-avatar>
-                  <span class="conv-name">{{ activeContact }}</span>
-                </div>
-                <div class="conv-messages">
-                  <div class="msg-bubble received">
-                    <p>你好！{{ privateMsgs.find(m => m.name === activeContact)?.text }}</p>
-                    <span class="bubble-time">{{ privateMsgs.find(m => m.name === activeContact)?.time }}</span>
-                  </div>
-                  <div class="msg-bubble sent">
-                    <p>好的，了解 👌</p>
-                    <span class="bubble-time">刚刚</span>
-                  </div>
-                </div>
-                <div class="conv-input">
-                  <el-input placeholder="输入消息..." size="large" />
-                  <el-button type="primary" round>发送</el-button>
-                </div>
-              </div>
-              <EmptyState v-else text="选择一个联系人开始聊天" />
-            </el-tab-pane>
-
-            <el-tab-pane label="系统通知" name="system">
-              <div v-for="notif in notifications" :key="notif.title" class="msg-item">
-                <el-avatar :size="44" icon="Bell" class="sys-avatar" />
-                <div class="msg-content">
-                  <div class="msg-top">
-                    <span class="msg-name">{{ notif.title }}</span>
-                    <span class="msg-time">{{ notif.time }}</span>
-                  </div>
-                  <p class="msg-text">{{ notif.text }}</p>
-                </div>
-              </div>
-              <EmptyState v-if="notifications.length === 0" text="暂无系统通知" />
-            </el-tab-pane>
-
-            <el-tab-pane label="互动消息" name="interact">
-              <div v-for="item in interactions" :key="item.text" class="msg-item">
-                <el-avatar :size="44" icon="ChatDotSquare" class="interact-avatar" />
-                <div class="msg-content">
-                  <div class="msg-top">
-                    <span class="msg-time">{{ item.time }}</span>
-                  </div>
-                  <p class="msg-text">{{ item.text }}</p>
-                </div>
-              </div>
-              <EmptyState v-if="interactions.length === 0" text="暂无互动消息" />
-            </el-tab-pane>
-          </el-tabs>
+        <div class="chat-input-area">
+          <el-input
+            v-model="inputText"
+            placeholder="输入消息..."
+            class="chat-input"
+            @keyup.enter="sendMessage"
+          />
+          <el-button type="primary" class="send-btn" :disabled="!inputText.trim()" @click="sendMessage">
+            发送
+          </el-button>
         </div>
       </div>
-    </el-card>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { Search } from '@element-plus/icons-vue'
-import EmptyState from '@/components/EmptyState.vue'
+import { ref, computed, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
+import { useMessageStore } from '@/stores/message'
 
-const activeTab = ref('private')
-const activeContact = ref('张三')
-const searchContact = ref('')
+const router = useRouter()
+const store = useMessageStore()
+const activeIndex = ref(0)
+const inputText = ref('')
+const chatBodyRef = ref<HTMLElement>()
 
-const privateMsgs = ref([
-  { name: '张三', text: '请问那个教材还在吗？', time: '10:32', unread: 1 },
-  { name: '李四', text: '拼单还差一个人，来吗？', time: '昨天', unread: 2 },
-  { name: '王五', text: '收到，明天下午见', time: '周一', unread: 0 },
-])
+const currentConv = computed(() => store.conversations[activeIndex.value] || store.conversations[0]!)
 
-const filteredContacts = computed(() => {
-  if (!searchContact.value.trim()) return privateMsgs.value
-  const q = searchContact.value.trim().toLowerCase()
-  return privateMsgs.value.filter(c => c.name.toLowerCase().includes(q))
-})
+function scrollToBottom() {
+  nextTick(() => {
+    const el = chatBodyRef.value
+    if (el) {
+      el.scrollTop = el.scrollHeight
+    }
+  })
+}
 
-const notifications = ref([
-  { title: '系统通知', text: '您的二手商品"高等数学教材"已被浏览12次', time: '2026-06-28' },
-  { title: '系统通知', text: '失物招领有新匹配，请查看', time: '2026-06-27' },
-])
+function switchConversation(idx: number) {
+  activeIndex.value = idx
+  const conv = store.conversations[idx]
+  if (conv) store.clearUnread(conv.name)
+  scrollToBottom()
+}
 
-const interactions = ref([
-  { text: '用户 student02 收藏了您的商品', time: '2026-06-26' },
-])
+function sendMessage() {
+  const text = inputText.value.trim()
+  if (!text) return
+
+  const conv = store.conversations[activeIndex.value]
+  if (!conv) return
+
+  store.sendMessage(conv.name, text)
+  inputText.value = ''
+  scrollToBottom()
+
+  setTimeout(() => {
+    store.replyMessage(conv.name)
+    scrollToBottom()
+  }, 1200 + Math.random() * 800)
+}
+
+function openFullChat() {
+  if (!currentConv.value) return
+  router.push(`/chat/${encodeURIComponent(currentConv.value.name)}`)
+}
 </script>
 
 <style scoped>
-.page { padding: 0; }
-
-.page-header {
-  margin-bottom: 24px;
-}
-
-.page-header h1 {
-  margin: 0;
-  font-size: 24px;
-  color: var(--color-text);
-  font-weight: 700;
-}
-
-.message-card {
-  border-radius: var(--radius-lg);
-  overflow: hidden;
+.page {
   padding: 0;
+  height: calc(100vh - var(--header-height) - 56px);
 }
 
 .message-layout {
-  display: flex;
-  min-height: 480px;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  height: 100%;
 }
 
-/* Sidebar */
 .msg-sidebar {
-  width: 300px;
-  border-right: 1px solid var(--color-border);
-  flex-shrink: 0;
+  background: var(--color-bg-white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
 }
 
-.sidebar-header {
-  padding: 16px;
+.sidebar-title {
+  padding: 16px 18px;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--color-text);
   border-bottom: 1px solid var(--color-border-light);
 }
 
@@ -177,10 +156,14 @@ const interactions = ref([
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
+  padding: 14px 18px;
   cursor: pointer;
   transition: background var(--transition-fast);
-  position: relative;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.contact-item:last-child {
+  border-bottom: none;
 }
 
 .contact-item:hover {
@@ -188,14 +171,14 @@ const interactions = ref([
 }
 
 .contact-item.active {
-  background: var(--color-primary-light);
+  background: #f0fdfa;
 }
 
 .contact-avatar {
   flex-shrink: 0;
   background: var(--color-primary-light);
   color: var(--color-primary);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .contact-info {
@@ -203,195 +186,160 @@ const interactions = ref([
   min-width: 0;
 }
 
-.contact-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2px;
-}
-
 .contact-name {
   font-size: 14px;
   font-weight: 600;
   color: var(--color-text);
-}
-
-.contact-time {
-  font-size: 11px;
-  color: var(--color-text-muted);
-}
-
-.contact-preview {
-  margin: 0;
-  font-size: 12px;
-  color: var(--color-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.unread-badge {
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  background: var(--color-danger);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 18px;
-  text-align: center;
-  border-radius: 9px;
+.contact-preview {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-right {
+  text-align: right;
   flex-shrink: 0;
 }
 
-/* Content */
-.msg-content-area {
-  flex: 1;
+.contact-time {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.unread-badge {
+  display: inline-block;
+}
+
+.chat-area {
+  background: var(--color-bg-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
-.msg-tabs {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.msg-tabs :deep(.el-tabs__header) {
-  padding: 0 20px;
-  margin-bottom: 0;
-}
-
-.msg-tabs :deep(.el-tabs__content) {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px 20px;
-}
-
-/* Conversation */
-.conversation {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.conv-header {
+.chat-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding-bottom: 16px;
+  justify-content: space-between;
+  padding: 14px 20px;
   border-bottom: 1px solid var(--color-border-light);
+  flex-shrink: 0;
+}
+
+.chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-avatar {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.chat-name {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 15px;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background: var(--color-bg);
+}
+
+.msg-row {
+  display: flex;
   margin-bottom: 16px;
 }
 
-.conv-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text);
+.msg-row.msg-me {
+  justify-content: flex-end;
 }
 
-.conv-messages {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding-bottom: 16px;
+.msg-bubble-wrap {
+  max-width: 60%;
 }
 
 .msg-bubble {
-  max-width: 70%;
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
-  position: relative;
-}
-
-.msg-bubble p {
-  margin: 0 0 4px;
+  padding: 10px 14px;
+  border-radius: 12px;
   font-size: 14px;
   line-height: 1.5;
+  word-break: break-word;
 }
 
-.bubble-time {
-  font-size: 11px;
-  opacity: 0.6;
-}
-
-.msg-bubble.received {
-  align-self: flex-start;
-  background: var(--color-bg);
+.msg-row:not(.msg-me) .msg-bubble {
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
   border-bottom-left-radius: 4px;
 }
 
-.msg-bubble.sent {
-  align-self: flex-end;
+.msg-row.msg-me .msg-bubble {
   background: var(--color-primary);
   color: #fff;
   border-bottom-right-radius: 4px;
 }
 
-.msg-bubble.sent .bubble-time {
-  color: rgba(255, 255, 255, 0.7);
+.msg-time {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
 }
 
-.conv-input {
+.msg-row.msg-me .msg-time {
+  text-align: right;
+}
+
+.chat-input-area {
   display: flex;
+  align-items: center;
   gap: 10px;
-  padding-top: 12px;
+  padding: 14px 20px;
   border-top: 1px solid var(--color-border-light);
-}
-
-.conv-input .el-button {
   flex-shrink: 0;
 }
 
-/* System / Interaction */
-.msg-item {
-  display: flex;
-  gap: 14px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--color-border-light);
-}
-
-.msg-item:last-child {
-  border-bottom: none;
-}
-
-.sys-avatar {
-  background: #fef3c7;
-  color: #d97706;
-}
-
-.interact-avatar {
-  background: #ede9fe;
-  color: #7c3aed;
-}
-
-.msg-content {
+.chat-input {
   flex: 1;
-  min-width: 0;
 }
 
-.msg-top {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4px;
+.chat-input :deep(.el-input__wrapper) {
+  border-radius: var(--radius-md);
 }
 
-.msg-name {
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--color-text);
+.send-btn {
+  flex-shrink: 0;
+  font-weight: 500;
 }
 
-.msg-time {
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-
-.msg-text {
-  margin: 0;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  line-height: 1.6;
+@media (max-width: 768px) {
+  .page {
+    height: auto;
+  }
+  .message-layout {
+    grid-template-columns: 1fr;
+  }
+  .msg-sidebar {
+    max-height: 200px;
+  }
+  .msg-bubble-wrap {
+    max-width: 80%;
+  }
 }
 </style>

@@ -9,7 +9,7 @@
       </div>
       <div class="hero-content">
         <div class="hero-text">
-          <h1 class="hero-title">{{ welcomeText }}</h1>
+          <h1 class="hero-title">{{ displayText }}<span class="typing-cursor">|</span></h1>
           <p class="hero-desc">轻量、可信、面向校园生活 — 交易 · 失物 · 拼单 · 跑腿</p>
           <div class="hero-search">
             <el-input
@@ -103,14 +103,14 @@ function handleSearch() {
   }
 }
 
-const welcomeText = ref('欢迎来到校园轻集市')
 const displayText = ref('')
 let charIndex = 0
+const welcomeMessage = '欢迎来到校园轻集市'
 
 onMounted(() => {
   const interval = setInterval(() => {
-    if (charIndex < welcomeText.value.length) {
-      displayText.value += welcomeText.value[charIndex]
+    if (charIndex < welcomeMessage.length) {
+      displayText.value += welcomeMessage[charIndex]
       charIndex++
     } else {
       clearInterval(interval)
@@ -222,6 +222,15 @@ const news = [
   -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: 1.2;
+}
+
+.typing-cursor {
+  -webkit-text-fill-color: var(--color-primary);
+  animation: blink 0.8s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
 }
 
 .hero-desc {

@@ -77,6 +77,19 @@
       "publishTime": "2026-06-30",
       "image": "",
       "id": 6
+    },
+    {
+      "publisher": "校园用户",
+      "status": "open",
+      "title": "六级资料",
+      "price": 28,
+      "category": "教材教辅",
+      "condition": "全新",
+      "location": "第一教学楼",
+      "description": "全新未拆封，附赠词汇书",
+      "publishTime": "2026-07-02",
+      "image": "",
+      "id": 7
     }
   ],
   "lostFounds": [

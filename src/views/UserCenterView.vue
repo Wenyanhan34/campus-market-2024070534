@@ -1,43 +1,147 @@
 <template>
   <div class="page">
-    <!-- 封面 + 个人信息 -->
-    <el-card shadow="never" class="profile-card">
-      <div class="profile-cover">
-        <div class="cover-gradient" />
-      </div>
-      <div class="profile-body">
-        <el-avatar :size="80" class="profile-avatar">
-          {{ userStore.userInitial }}
-        </el-avatar>
-        <div class="profile-info">
-          <div class="profile-name-row">
-            <h2>{{ userStore.displayName }}</h2>
-            <el-button type="primary" plain size="small" @click="showEditDialog = true">
-              <el-icon><Edit /></el-icon> 编辑资料
-            </el-button>
-          </div>
-          <p class="profile-meta">{{ userStore.userDescription }}</p>
-          <p class="profile-bio">{{ userStore.currentUser.bio }}</p>
-          <div class="profile-stats">
-            <div class="stat-item">
-              <strong>{{ favoriteStore.favoriteCount }}</strong>
-              <span>收藏</span>
-            </div>
+    <div class="layout-grid">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="profile-card">
+          <el-avatar :size="80" class="sidebar-avatar">
+            {{ userStore.userInitial }}
+          </el-avatar>
+          <div class="sidebar-name">{{ userStore.displayName }}</div>
+          <div class="sidebar-meta">{{ userStore.userDescription }} · {{ userStore.campusLabel }}</div>
+          <el-tag type="primary" effect="light" class="credit-tag">信用分 92</el-tag>
+          <div class="sidebar-stats">
             <div class="stat-item">
               <strong>{{ publishedCount }}</strong>
               <span>发布</span>
             </div>
             <div class="stat-item">
-              <strong>12</strong>
-              <span>浏览量</span>
+              <strong>{{ favoriteStore.favoriteCount }}</strong>
+              <span>收藏</span>
+            </div>
+            <div class="stat-item">
+              <strong>4</strong>
+              <span>消息</span>
             </div>
           </div>
         </div>
-      </div>
-    </el-card>
 
-    <!-- 编辑资料弹窗 -->
-    <el-dialog v-model="showEditDialog" title="编辑个人资料" width="480px" top="8vh">
+        <div class="menu-card">
+          <div
+            class="menu-item"
+            :class="{ active: activeTab === 'posts' }"
+            @click="activeTab = 'posts'"
+          >
+            <el-icon><Document /></el-icon> 我的发布
+          </div>
+          <div
+            class="menu-item"
+            :class="{ active: activeTab === 'favorites' }"
+            @click="activeTab = 'favorites'"
+          >
+            <el-icon><Star /></el-icon> 我的收藏
+          </div>
+          <div class="menu-item" @click="goMessage">
+            <el-icon><ChatDotRound /></el-icon> 消息中心
+          </div>
+          <div class="menu-item" @click="goSettings">
+            <el-icon><Setting /></el-icon> 账号设置
+          </div>
+        </div>
+      </aside>
+
+      <!-- Content -->
+      <div class="content-card">
+        <!-- Posts -->
+        <template v-if="activeTab === 'posts'">
+          <div class="content-header">
+            <h3>我的发布</h3>
+            <el-select v-model="postFilter" size="small" style="width:130px;">
+              <el-option label="全部" value="all" />
+              <el-option label="二手交易" value="trade" />
+              <el-option label="失物招领" value="lostFound" />
+              <el-option label="拼单搭子" value="groupBuy" />
+              <el-option label="跑腿委托" value="errand" />
+            </el-select>
+          </div>
+
+          <EmptyState v-if="filteredPublished.length === 0" text="暂无发布记录，去发布信息吧" />
+
+          <div v-else class="post-list">
+            <div v-for="item in filteredPublished" :key="`${item.type}-${item.id}`" class="post-item">
+              <div class="post-img">
+                <el-icon :size="28" color="rgba(255,255,255,0.5)"><Picture /></el-icon>
+              </div>
+              <div class="post-body">
+                <div class="post-head">
+                  <span class="post-title">{{ item.title }}</span>
+                  <el-tag
+                    size="small"
+                    :type="(item as any).status === 'open' ? 'success' : 'info'"
+                    effect="plain"
+                  >
+                    {{ (item as any).status === 'open' ? '进行中' : '已结束' }}
+                  </el-tag>
+                </div>
+                <div class="post-meta">
+                  {{ getTypeLabel(item.type) }}
+                  <template v-if="'location' in item"> · {{ (item as any).location }}</template>
+                  <template v-if="'publishTime' in item"> · {{ (item as any).publishTime }}</template>
+                  <template v-else-if="'eventTime' in item"> · {{ (item as any).eventTime }}</template>
+                </div>
+                <div class="post-actions">
+                  <el-button size="small" text @click="goDetail(item)">查看</el-button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Favorites -->
+        <template v-else>
+          <div class="content-header">
+            <h3>我的收藏</h3>
+            <span class="panel-count">共 {{ favoriteStore.favoriteCount }} 项</span>
+          </div>
+
+          <EmptyState v-if="favoriteStore.favorites.length === 0" text="暂无收藏内容，去逛逛吧" />
+
+          <div v-else class="favorite-grid">
+            <div
+              v-for="item in favoriteStore.favorites"
+              :key="`${item.type}-${item.id}`"
+              class="favorite-card"
+              @click="goDetail(item)"
+            >
+              <div class="fav-img">
+                <el-icon :size="32" color="rgba(255,255,255,0.4)"><Picture /></el-icon>
+              </div>
+              <div class="fav-body">
+                <div class="fav-title">{{ item.title }}</div>
+                <div class="fav-meta">{{ item.location }}</div>
+                <div class="fav-footer">
+                  <el-tag :type="getTypeTagType(item.type)" size="small" round>
+                    {{ getTypeLabel(item.type) }}
+                  </el-tag>
+                  <el-button
+                    type="danger"
+                    size="small"
+                    plain
+                    round
+                    @click.stop="favoriteStore.removeFavorite(item.type as any, item.id)"
+                  >
+                    取消收藏
+                  </el-button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- Edit Dialog -->
+    <el-dialog v-model="showEditDialog" title="编辑个人资料" width="520px" top="8vh" @open="syncEditForm">
       <el-form label-width="80px">
         <el-form-item label="昵称">
           <el-input v-model="editForm.name" />
@@ -48,6 +152,16 @@
         <el-form-item label="年级">
           <el-input v-model="editForm.grade" />
         </el-form-item>
+        <el-form-item label="校区">
+          <el-radio-group v-model="editForm.campus">
+            <el-radio-button value="east">东区</el-radio-button>
+            <el-radio-button value="west">西区</el-radio-button>
+            <el-radio-button value="south">南区</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="联系方式">
+          <el-input v-model="editForm.contact" placeholder="微信 / 手机号" />
+        </el-form-item>
         <el-form-item label="个人简介">
           <el-input v-model="editForm.bio" type="textarea" :rows="3" />
         </el-form-item>
@@ -57,94 +171,15 @@
         <el-button type="primary" @click="saveProfile">保存</el-button>
       </template>
     </el-dialog>
-
-    <!-- Tabs: 收藏 / 发布 -->
-    <el-card shadow="never" class="panel">
-      <el-tabs v-model="activeTab">
-        <el-tab-pane label="我的收藏" name="favorites">
-          <div class="panel-header">
-            <span class="panel-count">共 {{ favoriteStore.favoriteCount }} 项</span>
-          </div>
-
-          <EmptyState
-            v-if="favoriteStore.favorites.length === 0"
-            text="暂无收藏内容，去逛逛吧"
-          />
-
-          <div v-else class="item-list">
-            <ItemCard
-              v-for="item in favoriteStore.favorites"
-              :key="`${item.type}-${item.id}`"
-              :title="item.title"
-              :description="item.description"
-              :location="item.location"
-            >
-              <template #tag>
-                <el-tag :type="getTypeTagType(item.type)" size="small" round>
-                  {{ getTypeLabel(item.type) }}
-                </el-tag>
-              </template>
-              <template #footer>
-                <el-button
-                  type="danger"
-                  size="small"
-                  plain
-                  round
-                  @click="favoriteStore.removeFavorite(item.type, item.id)"
-                >
-                  <el-icon><Delete /></el-icon> 取消收藏
-                </el-button>
-              </template>
-            </ItemCard>
-          </div>
-        </el-tab-pane>
-
-        <el-tab-pane label="我的发布" name="published">
-          <div class="panel-header">
-            <span class="panel-count">共 {{ publishedCount }} 项</span>
-          </div>
-
-          <EmptyState
-            v-if="allPublished.length === 0"
-            text="暂无发布记录，去发布信息吧"
-          />
-
-          <div v-else class="item-list">
-            <ItemCard
-              v-for="item in allPublished"
-              :key="`${item.type}-${item.id}`"
-              :title="item.title"
-              :description="item.description"
-              :location="'location' in item ? (item as any).location : undefined"
-            >
-              <template #tag>
-                <el-tag :type="getTypeTagType(item.type)" size="small" round>
-                  {{ getTypeLabel(item.type) }}
-                </el-tag>
-              </template>
-              <template #footer>
-                <span class="publish-time">
-                  <el-icon><Clock /></el-icon>
-                  {{ 'publishTime' in item ? (item as any).publishTime : (('eventTime' in item) ? (item as any).eventTime : '') }}
-                </span>
-                <el-tag v-if="'status' in item" :type="(item as any).status === 'open' ? 'success' : 'info'" size="small" round effect="plain">
-                  {{ (item as any).status === 'open' ? '进行中' : '已结束' }}
-                </el-tag>
-              </template>
-            </ItemCard>
-          </div>
-        </el-tab-pane>
-      </el-tabs>
-    </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Edit } from '@element-plus/icons-vue'
+import { Document, Star, ChatDotRound, Setting, Picture } from '@element-plus/icons-vue'
 import EmptyState from '@/components/EmptyState.vue'
-import ItemCard from '@/components/ItemCard.vue'
 import { useFavoriteStore } from '@/stores/favorite'
 import { useUserStore } from '@/stores/user'
 import { getTrades, type TradeItem } from '@/api/trade'
@@ -152,15 +187,19 @@ import { getLostFounds, type LostFoundItem } from '@/api/lostFound'
 import { getGroupBuys, type GroupBuyItem } from '@/api/groupBuy'
 import { getErrands, type ErrandItem } from '@/api/errand'
 
+const router = useRouter()
 const userStore = useUserStore()
 const favoriteStore = useFavoriteStore()
 
 const activeTab = ref('favorites')
+const postFilter = ref('all')
 const showEditDialog = ref(false)
 const editForm = ref({
   name: userStore.currentUser.name,
   college: userStore.currentUser.college,
   grade: userStore.currentUser.grade,
+  campus: userStore.currentUser.campus,
+  contact: userStore.currentUser.contact,
   bio: userStore.currentUser.bio,
 })
 
@@ -213,6 +252,11 @@ const allPublished = computed<PublishedItem[]>(() => {
   return items
 })
 
+const filteredPublished = computed(() => {
+  if (postFilter.value === 'all') return allPublished.value
+  return allPublished.value.filter((p) => p.type === postFilter.value)
+})
+
 const publishedCount = computed(() => allPublished.value.length)
 
 function getTypeLabel(type: string) {
@@ -235,6 +279,36 @@ function getTypeTagType(type: string) {
   return map[type] || 'info'
 }
 
+function goDetail(item: PublishedItem) {
+  const routeMap: Record<string, string> = {
+    trade: '/trade/',
+    lostFound: '/lost-found/',
+    groupBuy: '/group-buy/',
+    errand: '/errand/',
+  }
+  const base = routeMap[item.type]
+  if (base) router.push(`${base}${item.id}`)
+}
+
+function goMessage() {
+  router.push('/message')
+}
+
+function goSettings() {
+  router.push('/settings')
+}
+
+function syncEditForm() {
+  editForm.value = {
+    name: userStore.currentUser.name,
+    college: userStore.currentUser.college,
+    grade: userStore.currentUser.grade,
+    campus: userStore.currentUser.campus,
+    contact: userStore.currentUser.contact,
+    bio: userStore.currentUser.bio,
+  }
+}
+
 function saveProfile() {
   userStore.updateProfile(editForm.value)
   showEditDialog.value = false
@@ -246,132 +320,257 @@ function saveProfile() {
 .page {
   display: flex;
   flex-direction: column;
+}
+
+.layout-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
   gap: 24px;
+  align-items: start;
 }
 
-/* Profile Card */
-.profile-card {
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  padding: 0;
-}
-
-.profile-cover {
-  height: 120px;
-  background: linear-gradient(135deg, #2563eb, #7c3aed, #06b6d4);
-  position: relative;
-  overflow: hidden;
-}
-
-.cover-gradient::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.15) 0%, transparent 60%);
-}
-
-.profile-body {
+/* Sidebar */
+.sidebar {
   display: flex;
-  align-items: flex-end;
-  gap: 28px;
-  padding: 0 28px 28px;
-  margin-top: -40px;
-  position: relative;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 28px;
 }
 
-.profile-avatar {
+.profile-card {
+  background: var(--color-bg-white);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.sidebar-avatar {
   border: 4px solid var(--color-bg-white);
   box-shadow: var(--shadow-md);
   background: var(--color-primary-light);
   color: var(--color-primary);
   font-weight: 700;
   font-size: 30px;
-  flex-shrink: 0;
+  margin-bottom: 12px;
 }
 
-.profile-info {
-  flex: 1;
-  padding-top: 44px;
+.sidebar-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
 }
 
-.profile-name-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 6px;
-}
-
-.profile-name-row h2 {
-  margin: 0;
-  font-size: 22px;
-  color: var(--color-text);
-  font-weight: 700;
-}
-
-.profile-meta {
-  margin: 0 0 4px;
+.sidebar-meta {
   font-size: 13px;
-  color: var(--color-text-muted);
+  color: #94a3b8;
+  margin-top: 4px;
 }
 
-.profile-bio {
-  margin: 0 0 14px;
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  line-height: 1.6;
+.credit-tag {
+  margin-top: 12px;
+  background: #f0fdfa !important;
+  color: #0d9488 !important;
+  border-color: #ccfbf1 !important;
 }
 
-.profile-stats {
+.sidebar-stats {
   display: flex;
-  gap: 32px;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
 }
 
 .stat-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  text-align: center;
 }
 
 .stat-item strong {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-text);
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
   line-height: 1.2;
 }
 
 .stat-item span {
   font-size: 12px;
-  color: var(--color-text-muted);
+  color: #94a3b8;
+  display: block;
+  margin-top: 2px;
 }
 
-/* Panel */
-.panel {
+.menu-card {
+  background: var(--color-bg-white);
   border-radius: var(--radius-lg);
+  padding: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-.panel-header {
+.menu-item {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: #475569;
+  font-size: 14px;
+}
+
+.menu-item:hover {
+  background: #f8fafc;
+  color: #0d9488;
+}
+
+.menu-item.active {
+  background: #f0fdfa;
+  color: #0d9488;
+  font-weight: 500;
+}
+
+/* Content */
+.content-card {
+  background: var(--color-bg-white);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  min-height: 500px;
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
+}
+
+.content-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
 }
 
 .panel-count {
   font-size: 13px;
-  color: var(--color-text-muted);
+  color: #94a3b8;
 }
 
-.item-list {
+/* Post list */
+.post-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
 }
 
-.publish-time {
-  font-size: 13px;
-  color: var(--color-text-muted);
+.post-item {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.post-item:last-child {
+  border-bottom: none;
+}
+
+.post-img {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #6366f1, #2563eb);
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+}
+
+.post-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.post-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.post-title {
+  font-weight: 500;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.post-meta {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.post-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Favorite grid */
+.favorite-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.favorite-card {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  border: 1px solid var(--color-border-light);
+}
+
+.favorite-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.fav-img {
+  height: 140px;
+  background: linear-gradient(135deg, #6366f1, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fav-body {
+  padding: 12px;
+}
+
+.fav-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fav-meta {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.fav-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
 }
 </style>

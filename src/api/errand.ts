@@ -20,3 +20,7 @@ export function getErrands() {
 export function createErrand(data: Omit<ErrandItem, 'id'>) {
   return http.post<ErrandItem>('/errands', data)
 }
+
+export function getErrandById(id: number) {
+  return http.get<ErrandItem>(`/errands/${id}`)
+}

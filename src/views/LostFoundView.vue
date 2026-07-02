@@ -16,7 +16,16 @@
       </div>
     </div>
 
-    <LoadingSkeleton v-if="loading" :count="4" />
+    <SearchBar v-model="keyword" placeholder="搜索标题、物品名称、地点或描述..." />
+
+    <LoadingState v-if="loading" text="正在加载失物招领信息..." />
+
+    <ErrorState
+      v-else-if="error"
+      message="失物招领数据加载失败，请检查 Mock 服务是否正常运行。"
+      show-retry
+      @retry="loadLostFounds"
+    />
 
     <EmptyState v-else-if="filteredList.length === 0" text="暂无失物招领信息">
       <template #action>
@@ -25,9 +34,13 @@
     </EmptyState>
 
     <div v-else class="list-wrap">
-      <ItemCard
+      <div
         v-for="item in filteredList"
         :key="item.id"
+        class="list-item"
+        @click="$router.push(`/lost-found/${item.id}`)"
+      >
+      <ItemCard
         :title="item.title"
         :description="item.description"
         :location="item.location"
@@ -65,6 +78,7 @@
           </el-button>
         </template>
       </ItemCard>
+      </div>
     </div>
   </div>
 </template>
@@ -74,26 +88,51 @@ import { ref, computed, onMounted } from 'vue'
 import { getLostFounds, type LostFoundItem } from '@/api/lostFound'
 import ItemCard from '@/components/ItemCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
-import LoadingSkeleton from '@/components/LoadingSkeleton.vue'
+import LoadingState from '@/components/LoadingState.vue'
+import ErrorState from '@/components/ErrorState.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import { useFavoriteStore } from '@/stores/favorite'
 
 const favoriteStore = useFavoriteStore()
 const filterType = ref('')
+const keyword = ref('')
 const lostFounds = ref<LostFoundItem[]>([])
 const loading = ref(true)
+const error = ref(false)
 
 const filteredList = computed(() => {
-  if (!filterType.value) return lostFounds.value
-  return lostFounds.value.filter(i => i.type === filterType.value)
+  let list = lostFounds.value
+  if (filterType.value) {
+    list = list.filter(i => i.type === filterType.value)
+  }
+  if (keyword.value.trim()) {
+    const q = keyword.value.trim().toLowerCase()
+    list = list.filter(i =>
+      i.title.toLowerCase().includes(q) ||
+      i.itemName.toLowerCase().includes(q) ||
+      i.location.toLowerCase().includes(q) ||
+      i.description.toLowerCase().includes(q)
+    )
+  }
+  return list
 })
 
-onMounted(async () => {
+async function loadLostFounds() {
+  loading.value = true
+  error.value = false
   try {
     const res = await getLostFounds()
     lostFounds.value = res.data
+  } catch {
+    error.value = true
+    lostFounds.value = []
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => {
+  loadLostFounds()
 })
 </script>
 
@@ -126,6 +165,10 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.list-item {
+  cursor: pointer;
 }
 
 .item-meta {

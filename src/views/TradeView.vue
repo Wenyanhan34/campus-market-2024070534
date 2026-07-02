@@ -23,7 +23,14 @@
       </div>
     </div>
 
-    <LoadingSkeleton v-if="loading" :count="4" />
+    <LoadingState v-if="loading" text="正在加载二手交易信息..." />
+
+    <ErrorState
+      v-else-if="error"
+      message="二手交易数据加载失败，请检查 Mock 服务是否正常运行（json-server --watch db.json --port 3002）。"
+      show-retry
+      @retry="loadTrades"
+    />
 
     <EmptyState v-else-if="filteredTrades.length === 0" text="暂无二手交易信息">
       <template #action>
@@ -32,9 +39,13 @@
     </EmptyState>
 
     <div v-else class="list-wrap">
-      <ItemCard
+      <div
         v-for="item in filteredTrades"
         :key="item.id"
+        class="list-item"
+        @click="$router.push(`/trade/${item.id}`)"
+      >
+      <ItemCard
         :title="item.title"
         :description="item.description"
         :location="item.location"
@@ -69,6 +80,7 @@
           </el-button>
         </template>
       </ItemCard>
+      </div>
     </div>
   </div>
 </template>
@@ -79,7 +91,8 @@ import { Search } from '@element-plus/icons-vue'
 import { getTrades, type TradeItem } from '@/api/trade'
 import ItemCard from '@/components/ItemCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
-import LoadingSkeleton from '@/components/LoadingSkeleton.vue'
+import LoadingState from '@/components/LoadingState.vue'
+import ErrorState from '@/components/ErrorState.vue'
 import { useFavoriteStore } from '@/stores/favorite'
 
 const favoriteStore = useFavoriteStore()
@@ -87,6 +100,7 @@ const searchText = ref('')
 const sortOrder = ref('default')
 const trades = ref<TradeItem[]>([])
 const loading = ref(true)
+const error = ref(false)
 
 const filteredTrades = computed(() => {
   let list = trades.value
@@ -103,13 +117,22 @@ const filteredTrades = computed(() => {
   return list
 })
 
-onMounted(async () => {
+async function loadTrades() {
+  loading.value = true
+  error.value = false
   try {
     const res = await getTrades()
     trades.value = res.data
+  } catch {
+    error.value = true
+    trades.value = []
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => {
+  loadTrades()
 })
 </script>
 
@@ -152,6 +175,10 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.list-item {
+  cursor: pointer;
 }
 
 .item-price {

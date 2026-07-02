@@ -9,18 +9,31 @@
       </div>
     </div>
 
-    <LoadingSkeleton v-if="loading" :count="4" />
+    <SearchBar v-model="keyword" placeholder="搜索标题、拼单类型、地点或描述..." />
 
-    <EmptyState v-else-if="groupBuys.length === 0" text="暂无拼单信息">
+    <LoadingState v-if="loading" text="正在加载拼单信息..." />
+
+    <ErrorState
+      v-else-if="error"
+      message="拼单数据加载失败，请检查 Mock 服务是否正常运行。"
+      show-retry
+      @retry="loadGroupBuys"
+    />
+
+    <EmptyState v-else-if="filteredList.length === 0" text="暂无拼单信息">
       <template #action>
         <el-button type="primary" size="small" @click="$router.push('/publish')">去发布</el-button>
       </template>
     </EmptyState>
 
     <div v-else class="list-wrap">
-      <ItemCard
-        v-for="item in groupBuys"
+      <div
+        v-for="item in filteredList"
         :key="item.id"
+        class="list-item"
+        @click="$router.push(`/group-buy/${item.id}`)"
+      >
+      <ItemCard
         :title="item.title"
         :description="item.description"
         :location="item.location"
@@ -64,29 +77,57 @@
           </el-button>
         </template>
       </ItemCard>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getGroupBuys, type GroupBuyItem } from '@/api/groupBuy'
 import ItemCard from '@/components/ItemCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
-import LoadingSkeleton from '@/components/LoadingSkeleton.vue'
+import LoadingState from '@/components/LoadingState.vue'
+import ErrorState from '@/components/ErrorState.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import { useFavoriteStore } from '@/stores/favorite'
 
 const favoriteStore = useFavoriteStore()
 const groupBuys = ref<GroupBuyItem[]>([])
+const keyword = ref('')
 const loading = ref(true)
+const error = ref(false)
 
-onMounted(async () => {
+const filteredList = computed(() => {
+  let list = groupBuys.value
+  if (keyword.value.trim()) {
+    const q = keyword.value.trim().toLowerCase()
+    list = list.filter(i =>
+      i.title.toLowerCase().includes(q) ||
+      i.type.toLowerCase().includes(q) ||
+      i.location.toLowerCase().includes(q) ||
+      i.description.toLowerCase().includes(q)
+    )
+  }
+  return list
+})
+
+async function loadGroupBuys() {
+  loading.value = true
+  error.value = false
   try {
     const res = await getGroupBuys()
     groupBuys.value = res.data
+  } catch {
+    error.value = true
+    groupBuys.value = []
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => {
+  loadGroupBuys()
 })
 </script>
 
@@ -119,6 +160,10 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.list-item {
+  cursor: pointer;
 }
 
 .progress-info {

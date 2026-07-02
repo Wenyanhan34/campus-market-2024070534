@@ -20,3 +20,7 @@ export function getLostFounds() {
 export function createLostFound(data: Omit<LostFoundItem, 'id'>) {
   return http.post<LostFoundItem>('/lostFounds', data)
 }
+
+export function getLostFoundById(id: number) {
+  return http.get<LostFoundItem>(`/lostFounds/${id}`)
+}

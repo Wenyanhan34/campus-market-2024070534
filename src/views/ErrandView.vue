@@ -9,18 +9,31 @@
       </div>
     </div>
 
-    <LoadingSkeleton v-if="loading" :count="4" />
+    <SearchBar v-model="keyword" placeholder="搜索标题、任务类型、取件地、送达地或描述..." />
 
-    <EmptyState v-else-if="errands.length === 0" text="暂无跑腿任务">
+    <LoadingState v-if="loading" text="正在加载跑腿任务..." />
+
+    <ErrorState
+      v-else-if="error"
+      message="跑腿数据加载失败，请检查 Mock 服务是否正常运行。"
+      show-retry
+      @retry="loadErrands"
+    />
+
+    <EmptyState v-else-if="filteredList.length === 0" text="暂无跑腿任务">
       <template #action>
         <el-button type="primary" size="small" @click="$router.push('/publish')">去发布</el-button>
       </template>
     </EmptyState>
 
     <div v-else class="list-wrap">
-      <ItemCard
-        v-for="item in errands"
+      <div
+        v-for="item in filteredList"
         :key="item.id"
+        class="list-item"
+        @click="$router.push(`/errand/${item.id}`)"
+      >
+      <ItemCard
         :title="item.title"
         :description="item.description"
         category-color="errand"
@@ -58,29 +71,58 @@
           </el-button>
         </template>
       </ItemCard>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getErrands, type ErrandItem } from '@/api/errand'
 import ItemCard from '@/components/ItemCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
-import LoadingSkeleton from '@/components/LoadingSkeleton.vue'
+import LoadingState from '@/components/LoadingState.vue'
+import ErrorState from '@/components/ErrorState.vue'
+import SearchBar from '@/components/SearchBar.vue'
 import { useFavoriteStore } from '@/stores/favorite'
 
 const favoriteStore = useFavoriteStore()
 const errands = ref<ErrandItem[]>([])
+const keyword = ref('')
 const loading = ref(true)
+const error = ref(false)
 
-onMounted(async () => {
+const filteredList = computed(() => {
+  let list = errands.value
+  if (keyword.value.trim()) {
+    const q = keyword.value.trim().toLowerCase()
+    list = list.filter(i =>
+      i.title.toLowerCase().includes(q) ||
+      i.taskType.toLowerCase().includes(q) ||
+      i.from.toLowerCase().includes(q) ||
+      i.to.toLowerCase().includes(q) ||
+      i.description.toLowerCase().includes(q)
+    )
+  }
+  return list
+})
+
+async function loadErrands() {
+  loading.value = true
+  error.value = false
   try {
     const res = await getErrands()
     errands.value = res.data
+  } catch {
+    error.value = true
+    errands.value = []
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => {
+  loadErrands()
 })
 </script>
 
@@ -113,6 +155,10 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.list-item {
+  cursor: pointer;
 }
 
 .reward-tag {

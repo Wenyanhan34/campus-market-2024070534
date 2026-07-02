@@ -502,7 +502,7 @@ async function handleSubmit() {
     ElMessage.success(`${labelMap[publishType.value]}发布成功！`)
     setTimeout(() => router.push(routeMap[publishType.value]!), 1200)
   } catch {
-    ElMessage.error('发布失败，请检查 Mock 服务是否正常运行')
+    ElMessage.error('发布失败，请确认 JSON Server 已启动（pnpm mock / json-server db.json --watch --port 3002），并检查表单数据是否完整。')
   } finally {
     submitting.value = false
   }

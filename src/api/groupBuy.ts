@@ -20,3 +20,7 @@ export function getGroupBuys() {
 export function createGroupBuy(data: Omit<GroupBuyItem, 'id'>) {
   return http.post<GroupBuyItem>('/groupBuys', data)
 }
+
+export function getGroupBuyById(id: number) {
+  return http.get<GroupBuyItem>(`/groupBuys/${id}`)
+}

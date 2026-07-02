@@ -7,6 +7,20 @@ export interface CurrentUser {
   grade: string
   avatar: string
   bio: string
+  campus: string
+  role: string
+  contact: string
+}
+
+const CAMPUS_LABELS: Record<string, string> = {
+  east: '东区',
+  west: '西区',
+  south: '南区',
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  student: '学生',
+  staff: '教职工',
 }
 
 export const useUserStore = defineStore('user', {
@@ -19,14 +33,19 @@ export const useUserStore = defineStore('user', {
       grade: '2023 级',
       avatar: '',
       bio: '热爱校园生活，喜欢分享闲置好物。',
+      campus: 'east',
+      role: 'student',
+      contact: '',
     } as CurrentUser,
   }),
 
   getters: {
     displayName: (state) => state.currentUser.name,
     userDescription: (state) => {
-      return `${state.currentUser.college} · ${state.currentUser.grade}`
+      return `${state.currentUser.college} · ${CAMPUS_LABELS[state.currentUser.campus] || state.currentUser.campus}`
     },
+    campusLabel: (state) => CAMPUS_LABELS[state.currentUser.campus] || state.currentUser.campus,
+    roleLabel: (state) => ROLE_LABELS[state.currentUser.role] || state.currentUser.role,
     userInitial: (state) => {
       return state.currentUser.name.slice(0, 1)
     },

@@ -21,3 +21,7 @@ export function getTrades() {
 export function createTrade(data: Omit<TradeItem, 'id'>) {
   return http.post<TradeItem>('/trades', data)
 }
+
+export function getTradeById(id: number) {
+  return http.get<TradeItem>(`/trades/${id}`)
+}
